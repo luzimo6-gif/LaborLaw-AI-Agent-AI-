@@ -1,0 +1,19 @@
+{
+  "_说明": "这是 users.json 的模板文件。使用时请复制为 users.json 并填写真实信息。",
+  "_注意": "users.json 已在 .gitignore 中，不会被提交到 Git。",
+  "_API提供商标识": {
+    "qwen": "阿里云百炼 (DashScope) - base_url: https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "deepseek": "DeepSeek 官方 - base_url: https://api.deepseek.com/v1",
+    "siliconflow": "硅基流动 - base_url: https://api.siliconflow.cn/v1",
+    "custom": "自定义 OpenAI 兼容接口"
+  },
+  "admin": {
+    "password": "sha256哈希值",
+    "name": "管理员",
+    "role": "admin",
+    "api_key": "sk-your-api-key-here",
+    "api_provider": "qwen",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "model": "qwen-plus"
+  }
+}

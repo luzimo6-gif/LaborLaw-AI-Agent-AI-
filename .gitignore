@@ -1,0 +1,23 @@
+# 忽略 Python 缓存和虚拟环境
+__pycache__/
+venv/
+.venv/
+env/
+.env
+
+# 忽略打包生成的文件夹（云端会帮我们重新打包）
+build/
+dist/
+*.spec
+
+# 绝对不能上传的本地数据和密码！
+users.json
+feedback.json
+vectorstore.pkl
+data/
+
+# 忽略 IDE 配置
+.vscode/
+
+# 忽略大文件缓存
+chunks_cache.jsonl

@@ -1,0 +1,33 @@
+# ── 核心框架 ──
+langchain>=0.1.0
+langgraph>=0.0.47
+langchain-openai>=0.0.8
+langchain-community>=0.0.10
+langchain-text-splitters>=0.0.1
+langchain-core>=0.1.0
+langchain-chroma>=0.1.0
+
+# ── GUI 桌面端 ──
+nicegui>=1.4.0
+pywebview>=4.0.0
+
+# ── 打包发布 ──
+pyinstaller>=6.0.0
+
+# ── 数据处理 ──
+pydantic>=2.0.0
+numpy>=1.24.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+protobuf==3.20.3
+
+# ── 文档解析 ──
+pymupdf>=1.23.0
+docx2txt>=0.8
+pypdf>=3.17.0
+
+# ── 向量数据库（可选，离线模式使用 SimpleVectorStore） ──
+chromadb>=1.5.0,<2.0.0
+
+# ── 构建工具 ──
+tqdm>=4.65.0

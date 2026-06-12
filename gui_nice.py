@@ -43,6 +43,9 @@ COLOR_ERROR = "#DC2626"
 COLOR_INFO = "#2563EB"
 COLOR_SIDEBAR_BG = "#F7F9FC"
 
+USER_AVATAR_URL = "/ui_images/avatars/user-client.png"
+AI_AVATAR_URL = "/ui_images/avatars/ai-assistant.png"
+
 API_PROVIDER_OPTIONS = [
     ("阿里云百炼 (Qwen)", "qwen"),
     ("DeepSeek 官方", "deepseek"),
@@ -293,6 +296,7 @@ class GlobalState:
         self.messages = []
         self.form_data = {"案件发生地": "", "单位名称": "", "平均月薪": "", "时间节点": "", "核心诉求": "", "详细经过": ""}
         self.ai_mode = "PRO"
+        self.ai_mode_confirmed = False
         self.ready_for_analysis = False
         self.analysis_result = None
         self.report_generated = False
@@ -319,8 +323,8 @@ def _handle_global_key(e, focus_callback):
 
 
 async def _on_input_keydown(e, input_box, send_callback):
-    """处理输入框键盘事件：Ctrl+Enter 快速发送"""
-    if e.action.keydown and e.key.name == 'Enter' and e.modifiers.ctrl:
+    """处理输入框键盘事件：Enter 发送，Shift+Enter 换行"""
+    if e.action.keydown and e.key.name == 'Enter' and not e.modifiers.shift:
         await send_callback()
 
 
@@ -1003,7 +1007,7 @@ def chat_messages_area():
                 # 用户消息：无头像，柔和微灰大圆角气泡
                 ui.chat_message(
                     msg["content"],
-                    name='', sent=True, avatar=''
+                    name=state.user_name or '我', sent=True, avatar=USER_AVATAR_URL
                 ).classes(
                     'max-w-[80%] ml-auto '
                     'rounded-3xl px-6 py-3 '
@@ -1021,7 +1025,7 @@ def chat_messages_area():
                     # AI 消息：完全透明背景，✨ 发光图标，文字直接铺在页面上
                     ui.chat_message(
                         content,
-                        name='AI 劳动法助手', sent=False, avatar='✨'
+                        name='AI 劳动法助手', sent=False, avatar=AI_AVATAR_URL
                     ).classes(
                         'max-w-[85%] bg-transparent '
                         'leading-relaxed text-base '
@@ -1047,7 +1051,7 @@ def _render_citation_content(content: str, citations: dict):
     parts = re.split(r'(\[\d+(?:,\d+)*\])', content)
 
     # 先用 chat_message 渲染纯文本框架，然后在下方追加引用按钮行
-    with ui.chat_message(name='AI 劳动法助手', sent=False, avatar='✨')\
+    with ui.chat_message(name='AI 劳动法助手', sent=False, avatar=AI_AVATAR_URL)\
         .classes('max-w-[85%] bg-transparent leading-relaxed text-base text-slate-800 dark:text-slate-200')\
         .style('overflow-wrap: break-word; word-break: break-word;'):
         # 构建一个 row 来逐段渲染文本和引用上标
@@ -1311,7 +1315,24 @@ def build_chat_panel():
             # ── 左侧操作区：极简模式切换 + 附件上传 ──
             mode_label_text = '⚡ Quick' if state.ai_mode == 'QUICK' else '💼 Pro'
 
-            mode_btn = ui.button(mode_label_text)\
+            def apply_mode(mode: str, button=None):
+                was_unconfirmed = not state.ai_mode_confirmed
+                state.ai_mode = mode
+                state.ai_mode_confirmed = True
+                state.ready_for_analysis = False
+                state.report_generated = False
+                if button is not None:
+                    button.set_text('⚡ Quick' if mode == 'QUICK' else '💼 Pro')
+                ui.notify('已切换到普法模式' if mode == 'QUICK' else '已切换到案件模式', type='info')
+                chat_messages_area.refresh()
+                form_panel_area.refresh()
+                if was_unconfirmed:
+                    ui.navigate.to('/')
+
+            def toggle_mode():
+                apply_mode('PRO' if state.ai_mode == 'QUICK' else 'QUICK', mode_btn)
+
+            mode_btn = ui.button(mode_label_text, on_click=toggle_mode if state.ai_mode_confirmed else None)\
                 .props('flat dense no-caps').classes(
                     'text-slate-500 hover:bg-slate-100 '
                     'dark:hover:bg-zinc-700 '
@@ -1319,27 +1340,10 @@ def build_chat_panel():
                     'self-center'
                 )
 
-            with ui.menu():
-                def set_quick():
-                    state.ai_mode = 'QUICK'
-                    state.ready_for_analysis = False
-                    state.report_generated = False
-                    mode_btn.set_text('⚡ Quick')
-                    ui.notify('已切换到普法模式', type='info')
-                    chat_messages_area.refresh()
-                    form_panel_area.refresh()
-
-                def set_pro():
-                    state.ai_mode = 'PRO'
-                    state.ready_for_analysis = False
-                    state.report_generated = False
-                    mode_btn.set_text('💼 Pro')
-                    ui.notify('已切换到案件模式', type='info')
-                    chat_messages_area.refresh()
-                    form_panel_area.refresh()
-
-                ui.menu_item('⚡ 普法模式 Quick', on_click=set_quick)
-                ui.menu_item('💼 案件模式 Pro', on_click=set_pro)
+            if not state.ai_mode_confirmed:
+                with ui.menu():
+                    ui.menu_item('⚡ 普法模式 Quick', on_click=lambda: apply_mode('QUICK', mode_btn))
+                    ui.menu_item('💼 案件模式 Pro', on_click=lambda: apply_mode('PRO', mode_btn))
 
             # ── 附件上传按钮 → 弹出上传对话框 ──
             def open_upload_dialog():
@@ -1412,7 +1416,7 @@ def build_chat_panel():
                 input_box = ui.textarea(
                     placeholder='描述您的遭遇或提出疑问...'
                 ).classes('flex-1 mx-2 bg-transparent text-slate-800 dark:text-slate-200').props(
-                    'borderless autogrow'
+                    'borderless autogrow inputmode=text lang=zh-CN autocomplete=off autocorrect=off autocapitalize=off spellcheck=false'
                 ).style(
                     'min-height: 44px; font-size: 15px; '
                     'padding-top: 10px; padding-bottom: 10px;'
@@ -1425,10 +1429,23 @@ def build_chat_panel():
                 input_box.value = ''
                 await send_message(msg)
 
+            async def send_on_enter():
+                await do_send()
+
             # 注册全局引用（供快捷引导问使用）
             _set_input_refs(input_box, do_send)
 
-            input_box.on('keydown', lambda e: _on_input_keydown(e, input_box, do_send))
+            input_box.on(
+                'keydown',
+                send_on_enter,
+                js_handler="""(event) => {
+                    if (event.key === 'Enter' && !event.shiftKey) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        emit();
+                    }
+                }""",
+            )
 
             # ── 发送按钮：圆形极简图标按钮 ──
             ui.button(icon='arrow_upward', on_click=do_send)\
@@ -1496,24 +1513,36 @@ async def send_message(msg: str):
             global _stream_iter
             if _stream_iter is None:
                 return None
-            try:
-                update = next(_stream_iter)
-                # update 格式: {node_name: {state_keys: values}}
+            while True:
+                try:
+                    update = next(_stream_iter)
+                except StopIteration:
+                    _stream_iter = None
+                    return None
+                except Exception:
+                    _stream_iter = None
+                    return None
+
+                if not update:
+                    continue
+
+                # update 格式: {node_name: {state_keys: values}}；部分节点可能返回 None。
                 node_name = list(update.keys())[0]
-                node_data = update[node_name]
-                # 提取 messages 中的内容
-                msgs = node_data.get("messages", [])
+                node_data = update[node_name] or {}
+                if not isinstance(node_data, dict):
+                    return (node_name, "")
+
                 content_parts = []
+                triage_reply = node_data.get("triage_result", {}).get("reply")
+                if triage_reply:
+                    content_parts.append(triage_reply)
+
+                msgs = node_data.get("messages", [])
                 for m in msgs:
                     if hasattr(m, 'content') and m.content:
-                        content_parts.append(m.content)
+                        if m.content not in content_parts:
+                            content_parts.append(m.content)
                 return (node_name, "".join(content_parts))
-            except StopIteration:
-                _stream_iter = None
-                return None
-            except Exception:
-                _stream_iter = None
-                return None
 
         # 初始化迭代器
         await run.io_bound(_init_stream)

@@ -60,12 +60,18 @@ jobs:
           }
 
       - name: 创建 ZIP 包
+        id: zip
         run: |
           $ver = "${{ github.ref_name }}" -replace '^v', ''
           $date = Get-Date -Format "yyyyMMdd"
-          $zipName = "劳动法律智能体_根号三_v${ver}_Windows_${date}.zip"
-          Compress-Archive -Path "dist/劳动法律智能体_根号三/*" -DestinationPath "dist/$zipName"
-          Write-Host "ZIP 包: dist/$zipName"
+          $zipName = "LaborLaw_AI_Agent_v${ver}_Windows_${date}.zip"
+          Compress-Archive -Path "dist/劳动法律智能体_根号三/*" -DestinationPath $zipName
+          $zipFullPath = (Resolve-Path $zipName).Path
+          Write-Host "ZIP 包: $zipFullPath"
+          # 输出给后续步骤使用
+          "zip_name=$zipName" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "zip_path=$zipFullPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+        shell: pwsh
 
       - name: 上传到 GitHub Release
         uses: softprops/action-gh-release@v2
@@ -92,8 +98,7 @@ jobs:
             - 知识库数据包可选下载，用于离线法律法规检索
             - 用户数据保存在「我的文档\劳动法律智能体_根号三\」目录
 
-          files: |
-            dist/劳动法律智能体_根号三_*.zip
+          files: ${{ steps.zip.outputs.zip_name }}
           draft: false
           prerelease: false
         env:

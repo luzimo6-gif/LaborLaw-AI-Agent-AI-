@@ -15,7 +15,15 @@ os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 import json
 import re
+import sys
 from typing import TypedDict, List, Dict, Annotated
+
+# ── PyInstaller 打包路径兼容 ──
+if getattr(sys, 'frozen', False):
+    _BASE_DIR = sys._MEIPASS
+else:
+    _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 from langchain_openai import ChatOpenAI
 from langchain.embeddings.base import Embeddings
 from simple_vectorstore import SimpleVectorStore
@@ -108,7 +116,7 @@ app = None
 vectorstore = None
 retriever = None
 
-_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_SCRIPT_DIR = _BASE_DIR
 VECTORSTORE_PATH = os.path.join(_SCRIPT_DIR, "vectorstore.pkl")
 
 

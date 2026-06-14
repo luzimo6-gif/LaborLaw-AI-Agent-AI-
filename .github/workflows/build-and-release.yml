@@ -1,0 +1,100 @@
+name: Build & Release
+
+# 触发条件：推送 tag（如 v1.0.1）时自动打包 + 发布
+on:
+  push:
+    tags:
+      - 'v*'
+  # 也支持手动触发
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '版本号（如 v1.0.1）'
+        required: true
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    permissions:
+      contents: write  # 需要写权限来创建 Release
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: 生成图标
+        run: python generate_icon.py
+
+      - name: 写入版本号
+        run: |
+          $tag = "${{ github.ref_name }}"
+          # 去掉 v 前缀，如 v1.0.1 → 1.0.1
+          $ver = $tag -replace '^v', ''
+          $ver | Out-File -FilePath version.txt -Encoding utf8 -NoNewline
+          Write-Host "版本号: $ver"
+
+      - name: PyInstaller 打包
+        run: |
+          python -m PyInstaller --clean --noconfirm 劳动法律智能体_根号三.spec
+
+      - name: 验证输出
+        run: |
+          $exe = "dist/劳动法律智能体_根号三/劳动法律智能体_根号三.exe"
+          if (Test-Path $exe) {
+            $size = (Get-Item $exe).Length / 1MB
+            Write-Host "EXE 大小: $([math]::Round($size, 1)) MB"
+          } else {
+            Write-Error "未找到 EXE 文件！"
+            exit 1
+          }
+
+      - name: 创建 ZIP 包
+        run: |
+          $ver = "${{ github.ref_name }}" -replace '^v', ''
+          $date = Get-Date -Format "yyyyMMdd"
+          $zipName = "劳动法律智能体_根号三_v${ver}_Windows_${date}.zip"
+          Compress-Archive -Path "dist/劳动法律智能体_根号三/*" -DestinationPath "dist/$zipName"
+          Write-Host "ZIP 包: dist/$zipName"
+
+      - name: 上传到 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "劳动法律智能体_根号三 ${{ github.ref_name }}"
+          body: |
+            ## 📥 下载说明
+
+            ### 方式一：主程序（必装）
+            下载下方 ZIP 包，解压后双击 `劳动法律智能体_根号三.exe` 即可使用。
+
+            ### 方式二：知识库数据（可选）
+            如需完整的法律法规知识库（离线 RAG 检索），请额外下载 `知识库数据包.zip`，
+            解压后将 `data/` 和 `vectorstore.pkl` 放入程序目录。
+
+            ### 使用步骤
+            1. 下载主程序 ZIP 包并解压
+            2. 双击 `劳动法律智能体_根号三.exe` 运行
+            3. 首次使用请注册账号并配置 API Key
+            4. 不需要安装 Python 或 Git
+
+            ### ⚠️ 注意事项
+            - 本程序需要 API Key（阿里云百炼 / DeepSeek / 硅基流动）才能使用 AI 功能
+            - 知识库数据包可选下载，用于离线法律法规检索
+            - 用户数据保存在「我的文档\劳动法律智能体_根号三\」目录
+
+          files: |
+            dist/劳动法律智能体_根号三_*.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

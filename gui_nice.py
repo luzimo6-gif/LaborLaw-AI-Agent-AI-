@@ -16,10 +16,20 @@ import hashlib
 from datetime import datetime
 
 # ── 路径初始化 ──
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# PyInstaller 打包后资源文件解压在 sys._MEIPASS 临时目录
+if getattr(sys, 'frozen', False):
+    _BASE_DIR = sys._MEIPASS
+else:
+    _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+SCRIPT_DIR = _BASE_DIR
 if SCRIPT_DIR not in sys.path:
     sys.path.insert(0, SCRIPT_DIR)
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+
+# 用户数据目录（打包后程序本体只读，用户数据需写到这里）
+_USER_DATA_DIR = os.path.join(os.path.expanduser('~'), 'Documents', '劳动法律智能体_根号三')
+os.makedirs(_USER_DATA_DIR, exist_ok=True)
 
 from nicegui import ui, app, run
 
@@ -28,7 +38,8 @@ from nicegui import ui, app, run
 # ══════════════════════════════════════════
 APP_TITLE = "AI 劳动法"
 APP_VERSION_FILE = os.path.join(SCRIPT_DIR, "version.txt")
-USERS_FILE = os.path.join(SCRIPT_DIR, "users.json")
+USERS_FILE = os.path.join(_USER_DATA_DIR, "users.json")
+FEEDBACK_DB_FILE = os.path.join(_USER_DATA_DIR, "feedback.json")
 
 COLOR_PRIMARY = "#0F2C5C"
 COLOR_ACCENT = "#E6B800"
@@ -120,6 +131,13 @@ def load_users() -> dict:
     if os.path.exists(USERS_FILE):
         with open(USERS_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
+    # 尝试从打包资源中复制默认配置（如果有 users.json.example）
+    example_file = os.path.join(SCRIPT_DIR, "users.json.example")
+    if os.path.exists(example_file):
+        with open(example_file, "r", encoding="utf-8") as f:
+            default = json.load(f)
+        save_users(default)
+        return default
     default = {
         "lzy": {
             "password": hash_password("123456"),
@@ -346,7 +364,7 @@ def _update_dark_icon():
 # ══════════════════════════════════════════
 # 用户反馈数据存储（数据飞轮）
 # ══════════════════════════════════════════
-FEEDBACK_DB_FILE = os.path.join(SCRIPT_DIR, "feedback.json")
+# FEEDBACK_DB_FILE 已在顶部定义为用户数据目录下的路径
 
 def _load_feedback_db() -> list:
     """加载反馈数据库"""
@@ -1903,7 +1921,7 @@ def build_knowledge_page():
         # 数据目录
         with ui.card().classes('w-full flex-1 bg-white dark:bg-slate-800').style(f'border:1px solid {COLOR_BORDER};'):
             ui.label('📂 数据目录结构').style(f'font-size:13px; font-weight:bold; color:{COLOR_PRIMARY}')
-            data_dir = os.path.join(SCRIPT_DIR, "data")
+            data_dir = os.path.join(_BASE_DIR, "data")
             if os.path.exists(data_dir):
                 tree = build_dir_tree(data_dir)
                 ui.label(tree).classes('text-xs whitespace-pre').style('font-family: Consolas, monospace;')
@@ -1923,7 +1941,7 @@ _vectorstore_cache_path = None
 def _get_vectorstore():
     """获取向量库实例（带缓存，避免同一页面多次加载 pickle 文件）"""
     global _vectorstore_cache, _vectorstore_cache_path
-    vs_path = os.path.join(SCRIPT_DIR, "vectorstore.pkl")
+    vs_path = os.path.join(_BASE_DIR, "vectorstore.pkl")
     if _vectorstore_cache is not None and _vectorstore_cache_path == vs_path:
         return _vectorstore_cache
     if not os.path.exists(vs_path):
@@ -2051,7 +2069,6 @@ def build_dir_tree(path, indent=0):
 # ══════════════════════════════════════════
 # ── 静态文件路径（UI 图片）──
 # PyInstaller 打包后资源在 sys._MEIPASS 中
-_BASE_DIR = getattr(sys, '_MEIPASS', SCRIPT_DIR)
 UI_IMAGES_DIR = os.path.join(_BASE_DIR, "UI 图片")
 if os.path.isdir(UI_IMAGES_DIR):
     app.add_static_files('/ui_images', UI_IMAGES_DIR)

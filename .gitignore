@@ -8,7 +8,9 @@ env/
 # 忽略打包生成的文件夹（云端会帮我们重新打包）
 build/
 dist/
-*.spec
+
+# 忽略代码助手目录
+.codebuddy/
 
 # 绝对不能上传的本地数据和密码！
 users.json

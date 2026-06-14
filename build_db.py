@@ -59,6 +59,9 @@ DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 CACHE_FILE = os.path.join(SCRIPT_DIR, "chunks_cache.jsonl")
 VECTORSTORE_PATH = os.path.join(SCRIPT_DIR, "vectorstore.pkl")  # SimpleVectorStore pickle 文件
 
+# 可通过命令行 --output-dir 覆盖输出路径（不污染源码目录）
+_output_dir_override = None
+
 # ── 大模型 API ──
 # API_KEY 优先从环境变量读取，其次从 .env 文件加载
 import os as _os
@@ -863,7 +866,20 @@ def main():
         "--data-dir", type=str, default=DATA_DIR,
         help=f"数据目录（默认 {DATA_DIR}）"
     )
+    parser.add_argument(
+        "--output-dir", type=str, default="",
+        help="输出目录（vectorstore.pkl 和 chunks_cache.jsonl 的存放位置），不指定则使用脚本所在目录"
+    )
     args = parser.parse_args()
+
+    # 如果指定了 output-dir，修改输出路径
+    global CACHE_FILE, VECTORSTORE_PATH
+    if args.output_dir:
+        out_dir = os.path.abspath(args.output_dir)
+        os.makedirs(out_dir, exist_ok=True)
+        CACHE_FILE = os.path.join(out_dir, "chunks_cache.jsonl")
+        VECTORSTORE_PATH = os.path.join(out_dir, "vectorstore.pkl")
+        print(f"[配置] 输出目录: {out_dir}")
 
     load_workers = args.workers_load
     embed_workers = args.workers_embed

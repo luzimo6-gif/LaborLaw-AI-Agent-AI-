@@ -1,0 +1,20 @@
+[
+  {
+    "case_id": "incompetence-dismissal",
+    "query": "员工不能胜任工作，公司没有培训调岗就直接辞退是否合法？",
+    "expected_rule_ids": ["lcl.article40.incompetence"],
+    "expected_source_ids": ["lcl-40-2"]
+  },
+  {
+    "case_id": "compensation-years",
+    "query": "工作两年七个月解除劳动合同，经济补偿的工作年限如何计算？",
+    "expected_rule_ids": ["lcl.article47.compensation"],
+    "expected_source_ids": ["lcl-47-1"]
+  },
+  {
+    "case_id": "wage-arbitration-limit",
+    "query": "在职期间被拖欠工资，申请劳动仲裁是否超过一年就不能受理？",
+    "expected_rule_ids": ["ldm.article27.limit"],
+    "expected_source_ids": ["ldm-27"]
+  }
+]

@@ -23,3 +23,7 @@ data/
 
 # 忽略大文件缓存
 chunks_cache.jsonl
+graph_chunks.jsonl
+graph_failures.jsonl
+legal_graph.json
+legal_graph.db*

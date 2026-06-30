@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0.0",
+  "entities": [
+    {
+      "entity_id": "actor.worker",
+      "canonical_name": "劳动者",
+      "entity_type": "person_role",
+      "aliases": ["员工"]
+    },
+    {
+      "entity_id": "actor.employer",
+      "canonical_name": "用人单位",
+      "entity_type": "organization_role",
+      "aliases": ["单位", "公司"]
+    },
+    {
+      "entity_id": "instrument.labor_contract",
+      "canonical_name": "劳动合同",
+      "entity_type": "legal_instrument",
+      "aliases": []
+    },
+    {
+      "entity_id": "procedure.training_or_transfer",
+      "canonical_name": "培训或者调整工作岗位",
+      "entity_type": "procedure",
+      "aliases": ["培训调岗"]
+    },
+    {
+      "entity_id": "procedure.advance_notice",
+      "canonical_name": "提前三十日书面通知",
+      "entity_type": "procedure",
+      "aliases": ["提前通知"]
+    },
+    {
+      "entity_id": "remedy.economic_compensation",
+      "canonical_name": "经济补偿",
+      "entity_type": "remedy",
+      "aliases": ["经济补偿金"]
+    },
+    {
+      "entity_id": "procedure.labor_arbitration",
+      "canonical_name": "劳动争议仲裁",
+      "entity_type": "procedure",
+      "aliases": ["劳动仲裁"]
+    }
+  ],
+  "rules": [
+    {
+      "rule_id": "lcl.article40.incompetence",
+      "name": "不能胜任工作时的无过失解除",
+      "subjects": [{"entity_id": "actor.employer", "role": "解除方"}],
+      "action": "解除劳动合同",
+      "objects": [{"entity_id": "instrument.labor_contract", "role": "解除对象"}],
+      "conditions": [
+        {"text": "劳动者不能胜任工作", "entity_refs": ["actor.worker"]},
+        {"text": "经过培训或者调整工作岗位", "entity_refs": ["procedure.training_or_transfer"]},
+        {"text": "劳动者仍不能胜任工作", "entity_refs": ["actor.worker"]}
+      ],
+      "exceptions": [],
+      "procedures": [
+        {"text": "提前三十日以书面形式通知劳动者本人", "entity_refs": ["procedure.advance_notice"]},
+        {"text": "或者额外支付劳动者一个月工资", "entity_refs": ["actor.worker"]}
+      ],
+      "consequences": [
+        {"text": "用人单位可以解除劳动合同", "entity_refs": ["actor.employer", "instrument.labor_contract"]}
+      ],
+      "jurisdictions": ["全国"],
+      "effective_from": "2013-07-01",
+      "sources": [
+        {
+          "source_id": "lcl-40-2",
+          "law_name": "中华人民共和国劳动合同法",
+          "document_type": "law",
+          "authority_level": "national_law",
+          "article": "第四十条",
+          "paragraph": "第二项",
+          "quote": "有下列情形之一的，用人单位提前三十日以书面形式通知劳动者本人或者额外支付劳动者一个月工资后，可以解除劳动合同：（二）劳动者不能胜任工作，经过培训或者调整工作岗位，仍不能胜任工作的；",
+          "chunk_id": "golden:lcl:40",
+          "jurisdiction": "全国",
+          "promulgated_on": "2012-12-28",
+          "effective_from": "2013-07-01"
+        }
+      ],
+      "tags": ["劳动合同解除", "不能胜任工作"],
+      "extraction_confidence": 1.0
+    },
+    {
+      "rule_id": "lcl.article47.compensation",
+      "name": "经济补偿年限与月数计算",
+      "subjects": [{"entity_id": "actor.employer", "role": "支付方"}],
+      "action": "支付经济补偿",
+      "objects": [{"entity_id": "remedy.economic_compensation", "role": "给付内容"}],
+      "conditions": [
+        {"text": "依法属于应当支付经济补偿的情形", "entity_refs": []}
+      ],
+      "exceptions": [],
+      "procedures": [],
+      "consequences": [
+        {"text": "每满一年支付一个月工资", "entity_refs": ["remedy.economic_compensation"]},
+        {"text": "六个月以上不满一年的按一年计算", "entity_refs": ["remedy.economic_compensation"]},
+        {"text": "不满六个月的支付半个月工资", "entity_refs": ["remedy.economic_compensation"]}
+      ],
+      "jurisdictions": ["全国"],
+      "effective_from": "2013-07-01",
+      "sources": [
+        {
+          "source_id": "lcl-47-1",
+          "law_name": "中华人民共和国劳动合同法",
+          "document_type": "law",
+          "authority_level": "national_law",
+          "article": "第四十七条",
+          "paragraph": "第一款",
+          "quote": "经济补偿按劳动者在本单位工作的年限，每满一年支付一个月工资的标准向劳动者支付。六个月以上不满一年的，按一年计算；不满六个月的，向劳动者支付半个月工资的经济补偿。",
+          "chunk_id": "golden:lcl:47",
+          "jurisdiction": "全国",
+          "promulgated_on": "2012-12-28",
+          "effective_from": "2013-07-01"
+        }
+      ],
+      "tags": ["经济补偿", "工作年限"],
+      "extraction_confidence": 1.0
+    },
+    {
+      "rule_id": "ldm.article27.limit",
+      "name": "劳动争议仲裁时效及欠薪例外",
+      "subjects": [{"entity_id": "actor.worker", "role": "申请人"}],
+      "action": "申请劳动争议仲裁",
+      "objects": [{"entity_id": "procedure.labor_arbitration", "role": "程序"}],
+      "conditions": [
+        {"text": "当事人知道或者应当知道其权利被侵害", "entity_refs": ["actor.worker"]}
+      ],
+      "exceptions": [
+        {"text": "劳动关系存续期间因拖欠劳动报酬发生争议，不受一年仲裁时效期间限制", "entity_refs": ["actor.worker", "actor.employer"]},
+        {"text": "劳动关系终止的，应当自劳动关系终止之日起一年内提出", "entity_refs": ["actor.worker"]}
+      ],
+      "procedures": [],
+      "consequences": [
+        {"text": "劳动争议申请仲裁的时效期间为一年", "entity_refs": ["procedure.labor_arbitration"]}
+      ],
+      "limitation_period": {
+        "iso_8601_duration": "P1Y",
+        "starts_when": "当事人知道或者应当知道其权利被侵害之日",
+        "interruption_rules": [],
+        "suspension_rules": []
+      },
+      "jurisdictions": ["全国"],
+      "effective_from": "2008-05-01",
+      "sources": [
+        {
+          "source_id": "ldm-27",
+          "law_name": "中华人民共和国劳动争议调解仲裁法",
+          "document_type": "law",
+          "authority_level": "national_law",
+          "article": "第二十七条",
+          "paragraph": "第一款、第四款",
+          "quote": "劳动争议申请仲裁的时效期间为一年。仲裁时效期间从当事人知道或者应当知道其权利被侵害之日起计算。……劳动关系存续期间因拖欠劳动报酬发生争议的，劳动者申请仲裁不受本条第一款规定的仲裁时效期间的限制；但是，劳动关系终止的，应当自劳动关系终止之日起一年内提出。",
+          "chunk_id": "golden:ldm:27",
+          "jurisdiction": "全国",
+          "promulgated_on": "2007-12-29",
+          "effective_from": "2008-05-01"
+        }
+      ],
+      "tags": ["仲裁时效", "拖欠劳动报酬"],
+      "extraction_confidence": 1.0
+    }
+  ]
+}

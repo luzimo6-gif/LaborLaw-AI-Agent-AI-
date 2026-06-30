@@ -115,9 +115,12 @@ embeddings = None
 app = None
 vectorstore = None
 retriever = None
+graph_store = None
+hybrid_retriever = None
 
 _SCRIPT_DIR = _BASE_DIR
 VECTORSTORE_PATH = os.path.join(_SCRIPT_DIR, "vectorstore.pkl")
+GRAPH_DB_PATH = os.path.join(_SCRIPT_DIR, "legal_graph.db")
 
 
 def _mask_key(key: str) -> str:
@@ -788,7 +791,7 @@ class LegalRegexSplitter:
 
 def _init_vectorstore():
     """初始化/加载 RAG 向量知识库"""
-    global vectorstore, retriever, embeddings
+    global vectorstore, retriever, embeddings, graph_store, hybrid_retriever
     
     vectorstore = SimpleVectorStore(persist_path=VECTORSTORE_PATH, embedding_function=embeddings)
     if os.path.exists(VECTORSTORE_PATH):
@@ -817,6 +820,26 @@ def _init_vectorstore():
             vectorstore = SimpleVectorStore(persist_path=VECTORSTORE_PATH, embedding_function=embeddings)
 
     retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+
+    # GraphRAG 是可选增强：数据库存在则启用，不存在仍保持原向量检索。
+    graph_store = None
+    hybrid_retriever = None
+    if os.path.exists(GRAPH_DB_PATH):
+        try:
+            from graph_store import LegalGraphStore
+            from hybrid_retriever import HybridLegalRetriever
+
+            graph_store = LegalGraphStore(GRAPH_DB_PATH, read_only=True)
+            hybrid_retriever = HybridLegalRetriever(vectorstore, graph_store)
+            entity_count, rule_count, source_count = graph_store.counts()
+            print(
+                f">>> GraphRAG 已启用: {entity_count} 实体 / "
+                f"{rule_count} 规则 / {source_count} 来源"
+            )
+        except Exception as exc:
+            graph_store = None
+            hybrid_retriever = None
+            print(f">>> [WARN] GraphRAG 初始化失败，回退向量检索: {exc}")
 
 # ==========================================
 # 4. 定义全局状态 (新增并行与自我纠错字段)
@@ -1162,8 +1185,49 @@ def legal_researcher_node(state: LaborLawState) -> LaborLawState:
     
     for q in queries:
         try:
-            # 检索更多结果，后续在内存中做地域过滤
-            docs = vectorstore.similarity_search(q, k=20)
+            # 优先混合检索；图数据库不存在或异常时回退原向量检索。
+            if hybrid_retriever is not None:
+                hybrid_result = hybrid_retriever.retrieve(
+                    q,
+                    k_vector=20,
+                    k_rules=8,
+                    graph_depth=1,
+                    jurisdiction=target_region,
+                )
+                from langchain_core.documents import Document
+
+                docs = []
+                for retrieved_rule in hybrid_result.rules:
+                    rule = retrieved_rule.rule
+                    conditions = "；".join(item.text for item in rule.conditions) or "无"
+                    exceptions = "；".join(item.text for item in rule.exceptions) or "无"
+                    procedures = "；".join(item.text for item in rule.procedures) or "无"
+                    consequences = "；".join(item.text for item in rule.consequences)
+                    for source in rule.sources:
+                        graph_path = " → ".join(retrieved_rule.graph_path)
+                        docs.append(Document(
+                            page_content=(
+                                f"《{source.law_name}》\n{source.article} {source.quote}\n"
+                                f"【图谱规则】{rule.name}\n"
+                                f"【适用条件】{conditions}\n"
+                                f"【例外】{exceptions}\n"
+                                f"【程序】{procedures}\n"
+                                f"【法律后果】{consequences}"
+                                + (f"\n【关联路径】{graph_path}" if graph_path else "")
+                            ),
+                            metadata={
+                                "source": source.source_path or source.law_name,
+                                "law_name": source.law_name,
+                                "article": source.article,
+                                "region": source.jurisdiction,
+                                "category": "GraphRAG",
+                                "chunk_id": source.chunk_id,
+                                "rule_id": rule.rule_id,
+                            },
+                        ))
+                docs.extend(hybrid_result.fallback_documents)
+            else:
+                docs = vectorstore.similarity_search(q, k=20)
             # 内存过滤：只保留符合地域条件的文档
             filtered_docs = []
             for doc in docs:

@@ -3,13 +3,14 @@
 build_db.py — 离线知识库建库脚本（独立运行，工业级）
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-流水线架构（6 个 Phase）：
+流水线架构（7 个 Phase）：
   Phase 1  目录扫描      → 收集全部 .pdf/.docx 文件路径
   Phase 2  多线程加载    → ThreadPoolExecutor + tqdm，60s 超时兜底
   Phase 3  法条正则切分  → LegalRegexSplitter（地域识别 + 章/节/条层级）
   Phase 4  JSONL 缓存    → chunks_cache.jsonl（断点续传）
-  Phase 5  并发 Embedding → ConcurrentDashScopeEmbeddings 分批入库
-  Phase 6  验证 & 报告   → 确认入库条数
+  Phase 5  图谱抽取（可选）→ 逐 chunk 抽取、校验、断点续传
+  Phase 6  并发 Embedding → ConcurrentDashScopeEmbeddings 分批入库
+  Phase 7  验证 & 报告   → 确认入库条数
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 用法：
@@ -17,6 +18,7 @@ build_db.py — 离线知识库建库脚本（独立运行，工业级）
     python build_db.py --from-cache           # 跳过 Phase 1~4，直接从 JSONL → Embedding → 入库
     python build_db.py --workers-load 4 --workers-embed 8
     python build_db.py --batch-size 300       # 自定义 ChromaDB 批次大小
+    python build_db.py --from-cache --graph-only  # 仅构建/恢复法律图谱
 
 依赖：
     pip install langchain langchain-community pymupdf docx2txt requests tqdm urllib3
@@ -58,6 +60,10 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 CACHE_FILE = os.path.join(SCRIPT_DIR, "chunks_cache.jsonl")
 VECTORSTORE_PATH = os.path.join(SCRIPT_DIR, "vectorstore.pkl")  # SimpleVectorStore pickle 文件
+GRAPH_CHECKPOINT_PATH = os.path.join(SCRIPT_DIR, "graph_chunks.jsonl")
+GRAPH_OUTPUT_PATH = os.path.join(SCRIPT_DIR, "legal_graph.json")
+GRAPH_FAILURES_PATH = os.path.join(SCRIPT_DIR, "graph_failures.jsonl")
+GRAPH_DB_PATH = os.path.join(SCRIPT_DIR, "legal_graph.db")
 
 # 可通过命令行 --output-dir 覆盖输出路径（不污染源码目录）
 _output_dir_override = None
@@ -75,6 +81,7 @@ if not API_KEY:
         pass
 BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 EMBED_MODEL = "text-embedding-v2"
+GRAPH_MODEL = _os.getenv("GRAPH_EXTRACTION_MODEL", "qwen-plus")
 EMBED_DIM = 1536                          # text-embedding-v2 输出维度
 
 
@@ -836,12 +843,13 @@ def write_to_simple_vs(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="离线法律知识库建库工具 — 6 Phase 工业级流水线",
+        description="离线法律知识库建库工具 — 向量库 + 法律知识图谱流水线",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例：
-  python build_db.py                             # 完整建库（Phase 1→6）
-  python build_db.py --from-cache                # 断点续传（Phase 5→6）
+  python build_db.py                             # 原有向量知识库建库
+  python build_db.py --build-graph               # 向量库 + 法律图谱
+  python build_db.py --from-cache --graph-only   # 从 chunk 缓存仅构建/恢复图谱
   python build_db.py --workers-load 4 --workers-embed 12
   python build_db.py --batch-size 200            # 更小的 ChromaDB 批次
         """,
@@ -870,15 +878,45 @@ def main():
         "--output-dir", type=str, default="",
         help="输出目录（vectorstore.pkl 和 chunks_cache.jsonl 的存放位置），不指定则使用脚本所在目录"
     )
+    parser.add_argument(
+        "--build-graph", action="store_true",
+        help="增加法律知识图谱抽取阶段（调用 LLM，结果支持断点续传）"
+    )
+    parser.add_argument(
+        "--graph-only", action="store_true",
+        help="只构建法律图谱，不重复构建向量库；自动启用 --build-graph"
+    )
+    parser.add_argument(
+        "--graph-model", type=str, default=GRAPH_MODEL,
+        help=f"图谱抽取模型（默认 {GRAPH_MODEL}，可用 GRAPH_EXTRACTION_MODEL 覆盖）"
+    )
+    parser.add_argument(
+        "--graph-retries", type=int, default=2,
+        help="单个 chunk 图谱抽取校验失败后的重试次数（默认 2）"
+    )
+    parser.add_argument(
+        "--reset-graph-checkpoint", action="store_true",
+        help="清空已有图谱检查点、失败记录和聚合结果后重新抽取"
+    )
     args = parser.parse_args()
+
+    if args.graph_only:
+        args.build_graph = True
+    if args.graph_retries < 0:
+        parser.error("--graph-retries 不能为负数")
 
     # 如果指定了 output-dir，修改输出路径
     global CACHE_FILE, VECTORSTORE_PATH
+    global GRAPH_CHECKPOINT_PATH, GRAPH_OUTPUT_PATH, GRAPH_FAILURES_PATH, GRAPH_DB_PATH
     if args.output_dir:
         out_dir = os.path.abspath(args.output_dir)
         os.makedirs(out_dir, exist_ok=True)
         CACHE_FILE = os.path.join(out_dir, "chunks_cache.jsonl")
         VECTORSTORE_PATH = os.path.join(out_dir, "vectorstore.pkl")
+        GRAPH_CHECKPOINT_PATH = os.path.join(out_dir, "graph_chunks.jsonl")
+        GRAPH_OUTPUT_PATH = os.path.join(out_dir, "legal_graph.json")
+        GRAPH_FAILURES_PATH = os.path.join(out_dir, "graph_failures.jsonl")
+        GRAPH_DB_PATH = os.path.join(out_dir, "legal_graph.db")
         print(f"[配置] 输出目录: {out_dir}")
 
     load_workers = args.workers_load
@@ -896,6 +934,11 @@ def main():
     print(f"  加载线程:    {load_workers}")
     print(f"  Embed线程:   {embed_workers}")
     print(f"  Chroma批次:  {chroma_batch}")
+    print(f"  构建图谱:    {'是' if args.build_graph else '否'}")
+    if args.build_graph:
+        print(f"  图谱模型:    {args.graph_model}")
+        print(f"  图谱输出:    {GRAPH_OUTPUT_PATH}")
+        print(f"  图数据库:    {GRAPH_DB_PATH}")
     print(f"  模式:        {'断点续传' if args.from_cache else '完整建库'}")
     print("=" * 72)
 
@@ -1008,13 +1051,114 @@ def main():
         print("\n" + "=" * 72)
         print("[Phase 4] 写入 JSONL 缓存（断点续传）")
         print("=" * 72)
+        from graph_build import assign_chunk_ids
+        assign_chunk_ids(chunks)
         save_chunks_to_jsonl(chunks, CACHE_FILE)
 
     # ================================================================
-    # Phase 5: 并发 Embedding → 分批写入 SimpleVectorStore
+    # Phase 5: 法律知识图谱抽取（可选、逐 chunk 断点续传）
+    # ================================================================
+    graph_report = None
+    if args.build_graph:
+        if not API_KEY:
+            print("[ERROR] 图谱抽取需要 DASHSCOPE_API_KEY，请通过环境变量或 .env 配置")
+            return
+
+        from graph_build import assign_chunk_ids, build_graph_checkpointed
+        from graph_extractor import GraphExtractor
+        from langchain_openai import ChatOpenAI
+
+        assign_chunk_ids(chunks)  # 兼容尚未包含 chunk_id 的旧缓存
+
+        if args.reset_graph_checkpoint:
+            for path in (
+                GRAPH_CHECKPOINT_PATH,
+                GRAPH_OUTPUT_PATH,
+                GRAPH_FAILURES_PATH,
+                GRAPH_DB_PATH,
+            ):
+                if os.path.exists(path):
+                    os.remove(path)
+                    print(f"[图谱重置] 已删除: {path}")
+
+        print("\n" + "=" * 72)
+        print(f"[Phase 5] 法律知识图谱抽取（模型 {args.graph_model}）")
+        print("=" * 72)
+
+        graph_llm = ChatOpenAI(
+            model=args.graph_model,
+            api_key=API_KEY,
+            base_url=BASE_URL,
+            temperature=0,
+            max_tokens=3000,
+        )
+        graph_extractor = GraphExtractor(graph_llm, max_retries=args.graph_retries)
+
+        try:
+            from tqdm import tqdm
+            graph_pbar = tqdm(total=len(chunks), desc="Graph 抽取", unit="chunk")
+        except ImportError:
+            graph_pbar = None
+
+        progress_state = {"current": 0, "failed": 0}
+
+        def _graph_progress(current, total, status):
+            if status == "failed":
+                progress_state["failed"] += 1
+            if graph_pbar:
+                graph_pbar.update(current - progress_state["current"])
+                graph_pbar.set_postfix_str(
+                    f"状态={status} | 失败={progress_state['failed']}"
+                )
+            elif current == total or status == "failed" or current % 10 == 0:
+                print(f"  [Graph] {current}/{total} | {status}")
+            progress_state["current"] = current
+
+        graph_report = build_graph_checkpointed(
+            documents=chunks,
+            extractor=graph_extractor,
+            checkpoint_path=GRAPH_CHECKPOINT_PATH,
+            output_path=GRAPH_OUTPUT_PATH,
+            failure_path=GRAPH_FAILURES_PATH,
+            progress_callback=_graph_progress,
+            should_stop=_interrupted.is_set,
+        )
+        if graph_pbar:
+            graph_pbar.close()
+
+        print(
+            "[Graph] 完成: "
+            f"新抽取 {graph_report.extracted}，恢复 {graph_report.resumed}，"
+            f"失败 {graph_report.failed}，实体 {graph_report.entity_count}，"
+            f"规则 {graph_report.rule_count}"
+        )
+        print(f"[Graph] 聚合图谱: {GRAPH_OUTPUT_PATH}")
+        print(f"[Graph] JSONL 检查点: {GRAPH_CHECKPOINT_PATH}")
+        if graph_report.failed:
+            print(f"[Graph] 失败明细: {GRAPH_FAILURES_PATH}")
+
+        from graph_store import LegalGraphStore
+        from legal_schema import LegalKnowledgeGraph
+
+        with open(GRAPH_OUTPUT_PATH, "r", encoding="utf-8") as graph_file:
+            graph_snapshot = LegalKnowledgeGraph.model_validate_json(graph_file.read())
+        with LegalGraphStore(GRAPH_DB_PATH) as graph_store:
+            graph_store.replace_graph(graph_snapshot)
+            entity_count, rule_count, source_count = graph_store.counts()
+        print(
+            f"[Graph] SQLite: {GRAPH_DB_PATH} "
+            f"({entity_count} 实体 / {rule_count} 规则 / {source_count} 来源)"
+        )
+
+        if args.graph_only:
+            print("[完成] --graph-only：跳过向量库重建")
+            return
+
+    # ================================================================
+    # Phase 6: 并发 Embedding → 分批写入 SimpleVectorStore
     # ================================================================
     print("\n" + "=" * 72)
-    print(f"[Phase 5] 并发 Embedding + 分批写入 SimpleVectorStore（{embed_workers} 线程）")
+    print(f"[Phase 6] 并发 Embedding + 分批写入 SimpleVectorStore（{embed_workers} 线程）")
     print("=" * 72)
 
     embedder = ConcurrentDashScopeEmbeddings(
@@ -1033,10 +1177,10 @@ def main():
         # 不 return，继续展示已完成部分的统计
 
     # ================================================================
-    # Phase 6: 验证入库结果
+    # Phase 7: 验证入库结果
     # ================================================================
     print("\n" + "=" * 72)
-    print("[Phase 6] 验证入库结果")
+    print("[Phase 7] 验证入库结果")
     print("=" * 72)
 
     try:
@@ -1077,6 +1221,10 @@ def main():
     print(f"  总 耗 时 : {overall_elapsed:.1f}s ({overall_elapsed/60:.1f}min)")
     print(f"  向量库路径: {VECTORSTORE_PATH}")
     print(f"  JSONL缓存: {CACHE_FILE}")
+    if graph_report:
+        print(f"  图谱规则数: {graph_report.rule_count}")
+        print(f"  图谱路径: {GRAPH_OUTPUT_PATH}")
+        print(f"  图数据库: {GRAPH_DB_PATH}")
     print("=" * 72)
 
     if final_count > 0 and final_count != len(chunks):

@@ -1,105 +1,178 @@
-# ⚖️ 劳动法 AI 智能助理 (Labor Law AI Agent)
+# 劳动权益助手 · LaborLaw AI
 
-![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Framework](https://img.shields.io/badge/framework-NiceGUI%20%7C%20LangGraph-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+<p align="center">
+  <img src="docs/contest/assets/laborlaw-ai-app-icon-source.png" width="180" alt="劳动权益助手图标">
+</p>
 
-> 基于多智能体协同 (Multi-Agent) 与现代化桌面 UI 架构构建的专业级劳动法垂直大模型客户端。
+<p align="center">
+  <strong>面向普通劳动者的 HarmonyOS 原生劳动法律 AI 助手</strong>
+</p>
 
----
+<p align="center">
+  <img src="https://img.shields.io/badge/HarmonyOS-6.1%20(API%2023)-e56b3f" alt="HarmonyOS 6.1">
+  <img src="https://img.shields.io/badge/ArkTS-ArkUI-2f8178" alt="ArkTS">
+  <img src="https://img.shields.io/badge/server-not%20required-1d4246" alt="No project server">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
+</p>
 
-## 🌟 核心特性 (Key Features)
+这是从原 Python 劳动法 AI 演示项目演进而来的 HarmonyOS 参赛版。应用将本地法律
+检索、可核对引用、多轮咨询、案件梳理和材料读取整合到一个原生 ArkUI 应用中。
 
-### 1. 🤖 多智能体深度推演 (Agentic Workflow)
-告别单线对话。底层基于 **LangGraph** 构建了包含 `事实梳理员`、`法条检索专员`、`合规审核员` 和 `主编质检员` 的流水线。复杂的案件信息将经过多轮校验，最终输出专业、严谨的分析报告。
+应用不依赖项目自建后台：使用者在设置页填写自己的 OpenAI 兼容 API，应用直接通过
+HTTPS 调用模型服务。本地法律索引随 HAP 发布，检索在设备上完成。
 
-### 2. 📖 可视化审计轨迹与 RAG 溯源归因 (Citation & Audit Trail)
-打破 LLM 黑盒与幻觉风险：
-- **流转可见：** 前端实时展示多智能体节点的推演轨迹。
-- **依法有据：** 生成结果内嵌交互式引用上标（如 `[1]`），点击即可弹窗核实具体法条与原始出处。
+> 本项目仅用于技术研究、普法辅助和应用创新展示，不构成法律意见。内置资料为机械
+> 收录，尚未完成全面法律效力审查，实际使用时请核对官方最新文本或咨询专业人士。
 
-### 3. 🖥️ 原生级现代桌面体验 (Modern Desktop UI)
-彻底摒弃老旧的 Tkinter 界面。采用 **NiceGUI + pywebview** 架构，融合 Google Gemini 的极简通透设计语言：
-- **沉浸式 Composer：** 悬浮圆角输入框，支持 `Ctrl+Enter` 快速发送。
-- **主题适配：** 全局原生支持暗黑模式 (Dark Mode)，保护视力。
-- **纯粹体验：** 打包为独立的 `.exe`，双击即用，无浏览器标签页干扰。
+## 已实现功能
 
-### 4. 🔄 错题本与数据飞轮 (Data Flywheel)
-内嵌即时的 👍/👎 反馈机制。遇到逻辑偏差，用户可一键录入纠正意见。系统将自动抓取 `当前上下文 + RAG 检索快照 + 人工修正` 进行结构化沉淀，为后续垂直模型微调（Fine-tune）提供极其珍贵的私有数据。
+- **普法咨询**：支持连续多轮问答、高频问题快捷入口和本地法条引用。
+- **案件模式**：围绕事实、争议和证据进行多轮梳理，保留完整上下文。
+- **智能卷宗**：填写六项案件信息，生成结构化分析报告。
+- **材料读取**：通过系统文件选择器读取 TXT、Markdown 和 DOCX；暂不支持 OCR。
+- **本地知识检索**：内置 2790 份资料、52903 个文本块，回答展示来源文件和条文。
+- **兼容模型 API**：支持标准 OpenAI Chat Completions 兼容接口。
+- **安全配置**：API Key 使用 HarmonyOS Asset Store Kit 保存，不写入源码。
+- **鸿蒙体验**：沉浸光感悬浮页签、服务卡片、全面屏布局以及手机/平板自适应。
 
----
+## HarmonyOS 特性
 
-## 🛠️ 技术架构 (Tech Stack)
+| 能力 | 项目中的用途 |
+| --- | --- |
+| UI Design Kit `HdsTabs` | 底部悬浮导航、沉浸材质与选中光感 |
+| Form Kit | “劳动权益速查”桌面服务卡片及高频场景入口 |
+| Asset Store Kit | 本机安全保存 API Key，并禁止跨设备同步 |
+| Core File Kit | 由用户主动授权选择 TXT、MD、DOCX 材料 |
+| ArkUI 自适应布局 | Phone/Tablet 和宽窗口布局切换 |
+| 沉浸式窗口 | 内容延伸至系统栏区域，同时保留安全区 |
 
-| 模块 | 技术 |
-|------|------|
-| GUI | NiceGUI (基于 Quasar & Vue 3) + Tailwind CSS |
-| 桌面壳 | pywebview + Microsoft Edge WebView2 |
-| LLM | 阿里云 DashScope (qwen-plus) / 兼容 OpenAI 接口 |
-| Embedding | text-embedding-v2 / 兼容 OpenAI Embeddings API |
-| RAG | LangChain + 自研 SimpleVectorStore (纯 NumPy) |
-| 工作流 | LangGraph 多智能体编排 |
-| 打包 | PyInstaller |
+详细实现见 [HarmonyOS 特性记录](docs/contest/phase-6-harmony-features.md)。
 
----
+## 运行架构
 
-## 🚀 快速开始 (Quick Start)
+```mermaid
+flowchart LR
+    U["用户输入 / 本地附件"] --> A["HarmonyOS ArkUI 应用"]
+    A --> K["随 HAP 发布的本地法律索引"]
+    K --> R["候选条文与引用 ID"]
+    R --> A
+    A -->|HTTPS，仅在用户提交时| M["用户配置的 OpenAI 兼容模型 API"]
+    M --> V["回答与报告"]
+    V --> C["引用校验与结果展示"]
+    C --> U
+```
 
-### 1. 本地开发环境配置
+没有项目服务器、Python 进程或远程向量数据库参与 App 运行。更完整的模块说明见
+[系统架构](docs/architecture.md)。
+
+## 快速开始
+
+### 环境要求
+
+- Apple Silicon 或 Intel Mac
+- DevEco Studio 6.1 Release
+- HarmonyOS SDK 6.1.0 / API 23
+- HarmonyOS 6.1 模拟器或真机
+
+### 打开并运行
 
 ```bash
-# 克隆仓库
-git clone https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME.git
-cd YOUR_REPO_NAME
-
-# 安装依赖
-pip install -r requirements.txt
-
-# 启动应用
-python gui_nice.py
+git clone https://github.com/luzimo6-gif/LaborLaw-AI-Agent-AI-.git
+cd LaborLaw-AI-Agent-AI-
 ```
 
-### 2. 配置 API Key
+1. 使用 DevEco Studio 打开 `harmony-app/`。
+2. 等待工程同步完成。
+3. 在 **Project Structure → Signing Configs** 中启用本机自动签名。
+4. 选择模拟器或已开启开发者模式的 HarmonyOS 真机。
+5. 点击 **Run 'entry'**。
 
-首次启动后，在注册/登录界面配置你的 API Key。支持以下兼容 OpenAI 接口的服务商：
+首次运行后进入“设置”，填写 Base URL、模型名称和 API Key，然后测试连接。
 
-- **阿里云 DashScope (Qwen)：** `https://dashscope.aliyuncs.com/compatible-mode/v1`
-- **DeepSeek：** `https://api.deepseek.com`
-- **硅基流动 (SiliconFlow)：** `https://api.siliconflow.cn/v1`
-
-### 3. 构建知识库
+命令行构建：
 
 ```bash
-# 将法律文档放入 data/ 目录后运行
-python build_db.py
+./tools/harmony/build-debug.sh
 ```
 
----
+未配置签名时生成 unsigned HAP；真机安装需要在 DevEco Studio 中配置自己的签名。
+完整步骤见 [构建、签名与真机调试](docs/harmonyos-build.md)。
 
-## 📁 项目结构
+## 模型接口
 
-```
-├── gui_nice.py           # NiceGUI 桌面应用入口
-├── backend.py            # LangGraph 多智能体引擎
-├── simple_vectorstore.py # 纯 NumPy 离线向量存储
-├── build_db.py           # 离线建库脚本
-├── data/                 # 法律文档库
-├── requirements.txt      # Python 依赖
-├── version.txt           # 版本号
-└── users.json            # 用户数据（首次启动自动创建）
+应用调用：
+
+```text
+POST {Base URL}/chat/completions
+Authorization: Bearer {API Key}
 ```
 
----
+模型服务必须提供 HTTPS 的 OpenAI Chat Completions 兼容接口。Base URL、模型名和
+API Key 均由使用者自行配置，仓库不包含任何真实密钥。
 
-## 🔒 安全说明
+## 本地知识库
 
-- 密码使用 **PBKDF2 加盐哈希** 存储，兼容旧版 SHA-256 自动升级
-- API Key 以用户维度隔离存储，不在代码中硬编码
-- SSL 证书验证默认启用，可通过环境变量 `VERIFY_SSL=false` 关闭（仅内网环境）
+仓库包含构建后的只读索引：
 
----
+```text
+harmony-app/entry/src/main/resources/rawfile/law_index.json
+```
 
-## 📄 License
+当前版本：
 
-MIT
+- 源文件：2790
+- 可检索文档：2761
+- 仅保留元数据：29
+- 文本块：52903
+- 索引大小：约 52 MiB
+
+这是关键词扩展与加权文本检索，不是向量数据库，也不是 GraphRAG。转换过程不调用
+模型，不执行 OCR、去重、历史版本合并或法律效力判断。需要用自己的资料重新生成时，
+请阅读 [知识库转换器说明](tools/kb_builder/README.md) 和
+[完整构建报告](docs/contest/full-kb-build-report.md)。
+
+## 项目结构
+
+```text
+.
+├── harmony-app/                  # HarmonyOS 原生应用
+│   ├── AppScope/                 # 应用级配置和图标
+│   └── entry/src/main/
+│       ├── ets/                  # 页面、服务、数据模型和服务卡片
+│       └── resources/            # UI 资源与本地法律索引
+├── tools/
+│   ├── harmony/                  # 命令行构建脚本
+│   └── kb_builder/               # 法律资料离线转换器
+├── docs/
+│   ├── architecture.md           # 系统架构
+│   ├── development-process.md    # 三天开发过程与决策
+│   ├── harmonyos-build.md        # 构建、签名和真机调试
+│   ├── privacy-security.md       # 隐私与安全说明
+│   └── contest/                  # 各阶段实施与验收记录
+├── backend.py / gui_nice.py      # 原 Python 桌面演示版
+└── tests/                        # Python 检索与图谱模块测试
+```
+
+## 开发文档
+
+- [文档总览](docs/README.md)
+- [系统架构](docs/architecture.md)
+- [开发过程与关键决策](docs/development-process.md)
+- [构建、签名与真机调试](docs/harmonyos-build.md)
+- [隐私与安全](docs/privacy-security.md)
+- [贡献指南](CONTRIBUTING.md)
+- [资料与许可证说明](NOTICE.md)
+
+## Python 桌面版
+
+仓库根目录保留了原 Python/NiceGUI 桌面演示版及 GraphRAG 实验代码，作为产品演进
+和算法对照。HarmonyOS App 运行时不依赖这些 Python 文件。桌面版依赖可通过
+`requirements.txt` 安装，相关功能与移动端并不完全一致。
+
+## 开源与责任边界
+
+代码按 [MIT License](LICENSE.txt) 开放。内置法律资料及其来源文件可能受各自权利
+声明约束，不因本仓库代码采用 MIT 而自动获得重新许可，详见 [NOTICE](NOTICE.md)。
+
+欢迎提交 Issue 和 Pull Request。涉及法律规则更新时，请同时提供官方来源、发布日期
+和效力状态，避免仅凭模型回答修改知识内容。

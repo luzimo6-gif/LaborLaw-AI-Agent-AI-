@@ -11,7 +11,7 @@
     "password": "sha256哈希值",
     "name": "管理员",
     "role": "admin",
-    "api_key": "sk-your-api-key-here",
+    "api_key": "YOUR_API_KEY",
     "api_provider": "qwen",
     "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
     "model": "qwen-plus"

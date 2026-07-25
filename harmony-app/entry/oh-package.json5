@@ -1,0 +1,9 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "LaborLaw AI HarmonyOS entry module",
+  "main": "",
+  "author": "LaborLaw AI contributors",
+  "license": "MIT",
+  "dependencies": {}
+}

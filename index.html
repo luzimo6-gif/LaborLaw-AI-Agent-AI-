@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="劳动权益助手——2026中国高校计算机大赛人工智能创意赛（鸿蒙赛道）应用创新作品公开视觉预览。">
+<meta name="theme-color" content="#1D4B8F">
+<title>劳动权益助手 · 鸿蒙赛道比赛公开预览</title>
+<style>
+  /* ============ TOKENS ============ */
+  :root{
+    color-scheme: light dark;
+    /* brand */
+    --blue:#1D4B8F; --blue-strong:#12315E; --blue-tint:#E8EFFA; --blue-soft:#5A86C9;
+    --gold:#C0842A; --gold-deep:#8F611B; --gold-glow:#FFD98A;
+    --ok:#2E9E7B; --danger:#D1584E;
+    /* page chrome neutrals (light) */
+    --page-bg:#EDF1F8; --page-bg-2:#E4EAF4;
+    --ink:#101E33; --muted:#54637C; --faint:#8593A8; --line:#DCE3EF;
+    --card:#FFFFFF; --card-2:#F4F7FC;
+    /* APP tokens (light) — used inside device frames */
+    --app-bg1:#F5F7FB; --app-bg2:#FFFFFF;
+    --app-surface:#FFFFFF; --app-surface2:#EEF2F8; --app-line:#E1E7F0;
+    --app-text:#0F1E33; --app-muted:#5B6B82; --app-faint:#8A97A8;
+    --app-blue:#1D4B8F; --app-blue-strong:#12315E; --app-tint:#E8EFFA;
+    --app-gold:#C0842A; --app-glow:#FFD98A;
+    --app-ok:#2E9E7B; --app-danger:#D1584E;
+    --nav-glass:rgba(255,255,255,.86); --nav-border:rgba(255,255,255,.9);
+    --bezel:#0b1017; --bezel-2:#161d28;
+    /* type */
+    --f-cjk:"HarmonyOS Sans SC","PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --f-num:"SF Pro Display","HarmonyOS Sans SC",system-ui,sans-serif;
+    --sh-e1:0 8px 24px rgba(16,30,51,.10),0 2px 6px rgba(16,30,51,.05);
+    --sh-e2:0 18px 48px rgba(16,30,51,.16),0 6px 16px rgba(16,30,51,.08);
+    --sh-dev:0 40px 90px -24px rgba(11,25,52,.55),0 12px 30px -12px rgba(11,25,52,.35);
+  }
+  @media (prefers-color-scheme:dark){ :root{ --pdark:1; } }
+  /* dark chrome + dark app tokens applied together via .t-dark, and to root in dark */
+  :root[data-theme="dark"], .t-dark{
+    --page-bg:#0A0F1A; --page-bg-2:#0E1524;
+    --ink:#EAF0FA; --muted:#9DB0CC; --faint:#6C7E99; --line:#26344E;
+    --card:#131C2E; --card-2:#0F1728;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --page-bg:#0A0F1A; --page-bg-2:#0E1524;
+      --ink:#EAF0FA; --muted:#9DB0CC; --faint:#6C7E99; --line:#26344E;
+      --card:#131C2E; --card-2:#0F1728;
+    }
+  }
+  /* APP dark tokens — reusable subtree class + follows page theme */
+  .t-dark, :root[data-theme="dark"], .app-dark{
+    --app-bg1:#0A1220; --app-bg2:#0E1B30;
+    --app-surface:rgba(23,34,55,.92); --app-surface2:#17233B; --app-line:#2A3A56;
+    --app-text:#EAF0FA; --app-muted:#9DB0CC; --app-faint:#6C7E99;
+    --app-blue:#5B8AD6; --app-blue-strong:#9DB8E2; --app-tint:#1B2942;
+    --app-gold:#E0B45C; --app-glow:#FFCE73;
+    --app-ok:#49C39B; --app-danger:#F0766B;
+    --nav-glass:rgba(21,31,51,.72); --nav-border:rgba(120,150,200,.22);
+    --bezel:#05080e; --bezel-2:#10161f;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --app-bg1:#0A1220; --app-bg2:#0E1B30;
+      --app-surface:rgba(23,34,55,.92); --app-surface2:#17233B; --app-line:#2A3A56;
+      --app-text:#EAF0FA; --app-muted:#9DB0CC; --app-faint:#6C7E99;
+      --app-blue:#5B8AD6; --app-blue-strong:#9DB8E2; --app-tint:#1B2942;
+      --app-gold:#E0B45C; --app-glow:#FFCE73;
+      --app-ok:#49C39B; --app-danger:#F0766B;
+      --nav-glass:rgba(21,31,51,.72); --nav-border:rgba(120,150,200,.22);
+      --bezel:#05080e; --bezel-2:#10161f;
+    }
+  }
+  /* force-light subtree (for comparison phone) */
+  .t-light{
+    --app-bg1:#F5F7FB; --app-bg2:#FFFFFF;
+    --app-surface:#FFFFFF; --app-surface2:#EEF2F8; --app-line:#E1E7F0;
+    --app-text:#0F1E33; --app-muted:#5B6B82; --app-faint:#8A97A8;
+    --app-blue:#1D4B8F; --app-blue-strong:#12315E; --app-tint:#E8EFFA;
+    --app-gold:#C0842A; --app-glow:#FFD98A; --app-ok:#2E9E7B; --app-danger:#D1584E;
+    --nav-glass:rgba(255,255,255,.86); --nav-border:rgba(255,255,255,.9);
+    --bezel:#0b1017; --bezel-2:#161d28;
+    --page-bg:#EDF1F8; --page-bg-2:#E4EAF4; --ink:#101E33; --muted:#54637C;
+    --faint:#8593A8; --line:#DCE3EF; --card:#FFFFFF; --card-2:#F4F7FC;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--f-cjk);background:
+      radial-gradient(1200px 700px at 82% -8%, color-mix(in srgb,var(--gold) 12%,transparent), transparent 60%),
+      radial-gradient(1100px 800px at 6% 2%, color-mix(in srgb,var(--blue) 16%,transparent), transparent 55%),
+      linear-gradient(180deg,var(--page-bg),var(--page-bg-2));
+      color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5;min-height:100vh}
+  .wrap{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,44px) clamp(16px,4vw,40px) 120px}
+  a{color:inherit}
+  ::selection{background:color-mix(in srgb,var(--gold) 35%,transparent)}
+
+  /* ---- top bar ---- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:34px}
+  .brandmark{display:flex;align-items:center;gap:13px}
+  .seal{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
+    background:linear-gradient(150deg,var(--blue-strong),var(--blue) 62%,var(--gold-deep));
+    box-shadow:0 10px 22px -6px color-mix(in srgb,var(--blue) 60%,transparent),inset 0 0 0 1px rgba(255,255,255,.14)}
+  .seal svg{width:27px;height:27px}
+  .brandmark b{font-size:16px;font-weight:800;letter-spacing:.3px;display:block}
+  .brandmark span{font-size:12px;color:var(--muted)}
+  .toolbar{display:flex;align-items:center;gap:10px}
+  .theme-toggle{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;gap:2px;box-shadow:var(--sh-e1)}
+  .theme-toggle button{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--muted);background:transparent;border:0;
+    padding:7px 13px;border-radius:999px;cursor:pointer;transition:.18s}
+  .theme-toggle button[aria-pressed="true"]{background:linear-gradient(180deg,var(--blue),var(--blue-strong));color:#fff;box-shadow:0 4px 12px -4px color-mix(in srgb,var(--blue) 70%,transparent)}
+  .theme-toggle button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+  /* ---- hero ---- */
+  .hero{position:relative;overflow:hidden;border-radius:28px;padding:clamp(26px,4.5vw,52px);
+    background:linear-gradient(115deg,#0c1b34 0%,#173a6b 44%,#2b4d84 66%,#5e5030 100%);
+    color:#eaf1fb;box-shadow:var(--sh-e2);isolation:isolate;margin-bottom:16px}
+  .hero::before{content:"";position:absolute;inset:0;z-index:-1;
+    background:radial-gradient(600px 320px at 88% 18%,rgba(255,217,138,.42),transparent 62%),
+              radial-gradient(520px 420px at 10% 108%,rgba(90,134,201,.5),transparent 60%)}
+  .hero .ghost-scale{position:absolute;right:-30px;top:50%;transform:translateY(-50%);width:340px;height:340px;opacity:.13;z-index:-1;color:#fff}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;font-weight:700;letter-spacing:2.4px;text-transform:uppercase;
+    color:var(--gold-glow);margin-bottom:16px}
+  .eyebrow::before{content:"";width:22px;height:1.5px;background:var(--gold-glow);opacity:.8}
+  .hero h1{margin:0;font-size:clamp(28px,4.6vw,46px);font-weight:800;letter-spacing:-.5px;line-height:1.1;text-wrap:balance;max-width:16ch}
+  .hero p{margin:16px 0 0;max-width:52ch;color:#c7d6ee;font-size:clamp(14px,1.6vw,16px)}
+  .hero .metas{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+  .chip-h{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;
+    background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);padding:7px 13px;border-radius:999px;backdrop-filter:blur(6px)}
+  .chip-h.gold{color:#0e1a2e;background:linear-gradient(180deg,var(--gold-glow),#e9c069);border-color:transparent}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--gold-glow);box-shadow:0 0 10px var(--gold-glow)}
+
+  /* ---- section heads ---- */
+  section{margin-top:56px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+  .sec-idx{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:1px}
+  .sec-head h2{margin:0;font-size:clamp(19px,2.4vw,25px);font-weight:800;letter-spacing:-.3px}
+  .sec-head p{margin:0;color:var(--muted);font-size:13.5px;flex:1;min-width:220px}
+  .release-note{display:flex;align-items:flex-start;gap:12px;margin:18px 0 0;padding:15px 17px;border-radius:16px;
+    background:color-mix(in srgb,var(--card) 88%,transparent);border:1px solid var(--line);box-shadow:var(--sh-e1)}
+  .release-note .badge{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:70px;height:28px;
+    border-radius:999px;background:color-mix(in srgb,var(--ok) 16%,var(--card));color:var(--ok);font-size:11.5px;font-weight:800}
+  .release-note p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+  .release-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:820px){.release-grid{grid-template-columns:1fr}}
+  .release-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--sh-e1)}
+  .release-card .num{font-family:var(--f-num);font-size:12px;font-weight:800;color:var(--gold);letter-spacing:1px}
+  .release-card h3{margin:8px 0 6px;font-size:16px}
+  .release-card p{margin:0;color:var(--muted);font-size:12.5px}
+
+  /* ---- token cards ---- */
+  .token-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}
+  @media(max-width:820px){.token-grid{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--sh-e1)}
+  .panel h3{margin:0 0 4px;font-size:14px;font-weight:800;letter-spacing:.2px}
+  .panel .sub{margin:0 0 16px;font-size:12px;color:var(--muted)}
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+  .sw{border-radius:13px;overflow:hidden;border:1px solid var(--line);background:var(--card-2)}
+  .sw .cap{height:56px;position:relative}
+  .sw .meta{padding:8px 9px}
+  .sw .meta b{font-size:11.5px;font-weight:700;display:block}
+  .sw .meta code{font-family:var(--f-num);font-size:10.5px;color:var(--muted);letter-spacing:.2px}
+  .sw .duo{display:flex;height:56px}
+  .sw .duo i{flex:1;display:block}
+  .type-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)}
+  .type-row:last-child{border-bottom:0}
+  .type-row .lbl{font-size:11px;color:var(--faint);font-family:var(--f-num);letter-spacing:.5px;white-space:nowrap}
+  .type-row .spec{font-size:11px;color:var(--muted);font-family:var(--f-num);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .type-row .demo{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* ============ DEVICE MOCKUPS ============ */
+  .stage{display:flex;flex-wrap:wrap;gap:clamp(20px,3vw,38px);justify-content:center;align-items:flex-start}
+  .device{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .cap-label{font-size:12.5px;color:var(--muted);text-align:center;max-width:300px}
+  .cap-label b{color:var(--ink);font-weight:700}
+  .cap-pill{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.4px;color:var(--blue);background:var(--blue-tint);
+    padding:3px 9px;border-radius:999px;margin-bottom:7px}
+  :root[data-theme="dark"] .cap-pill, .app-dark .cap-pill{color:#bcd2f2;background:rgba(91,138,214,.18)}
+
+  .phone{width:300px;border-radius:46px;background:linear-gradient(150deg,var(--bezel-2),var(--bezel));
+    padding:11px;box-shadow:var(--sh-dev);flex:none}
+  .phone.mini{width:270px}
+  .screen{position:relative;border-radius:36px;overflow:hidden;height:620px;
+    background:linear-gradient(180deg,var(--app-bg1),var(--app-bg2));color:var(--app-text);
+    font-size:13px;display:flex;flex-direction:column;isolation:isolate}
+  .tablet{width:640px;max-width:100%;border-radius:34px;background:linear-gradient(150deg,var(--bezel-2),var(--bezel));
+    padding:13px;box-shadow:var(--sh-dev)}
+  .tablet .screen{height:452px;border-radius:24px}
+
+  /* status bar */
+  .statusbar{display:flex;align-items:center;justify-content:space-between;padding:11px 22px 4px;font-family:var(--f-num);
+    font-size:12px;font-weight:700;color:var(--app-text);position:relative;z-index:5;flex:none}
+  .statusbar .r{display:flex;align-items:center;gap:6px}
+  .sig{display:flex;align-items:flex-end;gap:1.5px;height:9px}
+  .sig i{width:2.5px;background:currentColor;border-radius:1px}
+  .sig i:nth-child(1){height:3px}.sig i:nth-child(2){height:5px}.sig i:nth-child(3){height:7px}.sig i:nth-child(4){height:9px}
+  .batt{width:19px;height:10px;border:1.4px solid currentColor;border-radius:3px;position:relative;opacity:.9}
+  .batt::after{content:"";position:absolute;right:-3px;top:2.5px;width:2px;height:4px;background:currentColor;border-radius:0 1px 1px 0}
+  .batt i{position:absolute;inset:1.4px;width:72%;background:currentColor;border-radius:1px}
+
+  .body{flex:1;overflow:hidden;position:relative;display:flex;flex-direction:column}
+  .scrollcol{flex:1;overflow:hidden;padding:0 15px 84px}
+  .scrollcol.tall{padding-bottom:156px}
+
+  /* immersive header band */
+  .hband{position:relative;margin:2px -15px 12px;padding:14px 18px 18px;overflow:hidden;
+    background:linear-gradient(120deg,#12305c,#1d4b8f 60%,#7a6534);color:#eaf1fb;isolation:isolate}
+  .app-dark .hband,:root[data-theme="dark"] .hband{background:linear-gradient(120deg,#0d1f3c,#1f3f74 58%,#5b4c2b)}
+  .hband::after{content:"";position:absolute;inset:0;z-index:-1;
+    background:radial-gradient(220px 130px at 90% 8%,rgba(255,217,138,.5),transparent 60%)}
+  .hband .ghost{position:absolute;right:-14px;bottom:-30px;width:150px;height:150px;opacity:.16;color:#fff}
+  .hband h4{margin:0;font-size:19px;font-weight:800;letter-spacing:.2px}
+  .hband small{display:block;margin-top:4px;font-size:11.5px;color:#c9d8f0}
+  .hband .rule{width:34px;height:3px;border-radius:2px;background:var(--app-glow);margin-top:10px;box-shadow:0 0 10px var(--app-glow)}
+
+  .trust{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px}
+  .tchip{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:var(--app-muted);
+    background:var(--app-surface2);border:1px solid var(--app-line);padding:5px 9px;border-radius:999px}
+  .tchip svg{width:12px;height:12px;color:var(--app-blue)}
+  .tchip.count{color:var(--app-blue-strong);background:var(--app-tint);border-color:transparent}
+  .tchip.count b{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+  .scard{position:relative;border-radius:15px;padding:12px;border:1px solid var(--app-line);background:var(--app-surface);
+    box-shadow:0 4px 14px -8px rgba(16,30,51,.3);overflow:hidden}
+  .scard .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;margin-bottom:9px}
+  .scard .ic svg{width:17px;height:17px}
+  .scard.blue .ic{background:var(--app-tint);color:var(--app-blue)}
+  .scard.gold .ic{background:color-mix(in srgb,var(--app-gold) 20%,transparent);color:var(--app-gold)}
+  .scard b{font-size:12.5px;font-weight:700;display:block}
+  .scard small{font-size:10px;color:var(--app-muted);display:block;margin-top:2px}
+  .scard .arr{position:absolute;right:10px;top:12px;color:var(--app-faint)}
+
+  .kpanel{border-radius:15px;border:1px dashed var(--app-line);background:color-mix(in srgb,var(--app-surface2) 60%,transparent);
+    padding:12px;display:flex;align-items:center;gap:11px}
+  .kpanel .badge{width:34px;height:34px;border-radius:10px;background:var(--app-tint);color:var(--app-blue);display:grid;place-items:center;flex:none}
+  .kpanel .badge svg{width:19px;height:19px}
+  .kpanel b{font-size:12px;font-weight:700;display:block}
+  .kpanel small{font-size:10px;color:var(--app-muted)}
+  .kpanel .go{margin-left:auto;font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:15px;font-weight:800;color:var(--app-gold)}
+
+  /* composer capsule */
+  .composer{position:absolute;left:14px;right:14px;bottom:82px;display:flex;align-items:center;gap:8px;z-index:6;
+    background:var(--app-surface);border:1px solid var(--app-line);border-radius:26px;padding:7px 7px 7px 8px;
+    box-shadow:0 12px 30px -12px rgba(16,30,51,.45)}
+  .app-dark .composer,:root[data-theme="dark"] .composer{backdrop-filter:blur(14px)}
+  .composer .rnd{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none;border:1px solid var(--app-line);
+    background:var(--app-surface2);color:var(--app-gold)}
+  .composer .rnd svg{width:18px;height:18px}
+  .composer input{flex:1;border:0;background:transparent;font-family:inherit;font-size:12.5px;color:var(--app-text);min-width:0}
+  .composer input::placeholder{color:var(--app-faint)}
+  .composer .send{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;border:0;
+    background:linear-gradient(180deg,var(--app-gold),var(--gold-deep));box-shadow:0 0 0 0 var(--app-glow),0 6px 16px -4px color-mix(in srgb,var(--app-gold) 75%,transparent)}
+  .composer .send svg{width:18px;height:18px}
+  .composer.dim .send{background:var(--app-surface2);color:var(--app-faint);box-shadow:none}
+  .lawtog{position:absolute;left:14px;bottom:126px;z-index:6;display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:600;
+    color:var(--app-ok);background:color-mix(in srgb,var(--app-ok) 14%,transparent);border:1px solid color-mix(in srgb,var(--app-ok) 30%,transparent);
+    padding:4px 9px;border-radius:999px}
+  .lawtog svg{width:11px;height:11px}
+
+  /* floating island nav */
+  .nav{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;width:262px;z-index:7;
+    display:flex;justify-content:space-around;align-items:center;padding:8px 8px;border-radius:26px;
+    background:var(--nav-glass);border:1px solid var(--nav-border);backdrop-filter:blur(20px) saturate(1.3);
+    box-shadow:0 16px 40px -12px rgba(11,25,52,.4),inset 0 1px 0 rgba(255,255,255,.25)}
+  .nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--app-faint);text-decoration:none;position:relative;padding:5px 0;border-radius:16px}
+  .nav a svg{width:20px;height:20px}
+  .nav a small{font-size:9.5px;font-weight:600}
+  .nav a.on{color:var(--app-blue)}
+  .nav a.on::before{content:"";position:absolute;inset:0;border-radius:16px;background:radial-gradient(circle at 50% 22%,var(--app-glow),transparent 70%);opacity:.55;z-index:-1}
+  .nav a.on svg{filter:drop-shadow(0 3px 8px color-mix(in srgb,var(--app-gold) 70%,transparent))}
+  .gesture{position:absolute;left:50%;transform:translateX(-50%);bottom:6px;width:110px;height:4px;border-radius:3px;background:var(--app-text);opacity:.28;z-index:8}
+
+  /* section title inside app */
+  .apphead{padding:2px 2px 12px;flex:none}
+  .apphead h4{margin:0;font-size:20px;font-weight:800;letter-spacing:.2px;color:var(--app-text)}
+  .apphead small{font-size:11.5px;color:var(--app-muted)}
+
+  /* chat bubbles */
+  .msgs{display:flex;flex-direction:column;gap:11px}
+  .m{display:flex;gap:8px;max-width:100%}
+  .m.user{justify-content:flex-end}
+  .bub{max-width:82%;padding:10px 12px;border-radius:16px;font-size:12.5px;line-height:1.55}
+  .m.user .bub{background:linear-gradient(180deg,var(--app-blue),var(--app-blue-strong));color:#fff;border-bottom-right-radius:5px}
+  :root[data-theme="dark"] .m.user .bub,.app-dark .m.user .bub{color:#0a1220}
+  .m.ai .bub{background:var(--app-surface);border:1px solid var(--app-line);border-bottom-left-radius:5px;color:var(--app-text)}
+  .ai-av{width:26px;height:26px;border-radius:9px;flex:none;display:grid;place-items:center;
+    background:linear-gradient(150deg,var(--app-blue-strong),var(--app-blue));color:var(--app-glow);box-shadow:0 3px 8px -3px rgba(16,30,51,.5)}
+  .ai-av svg{width:15px;height:15px}
+  .bub .h5{font-size:11px;font-weight:800;color:var(--app-blue);margin:0 0 5px;letter-spacing:.3px}
+  .bub ol{margin:2px 0 0;padding-left:16px;display:flex;flex-direction:column;gap:5px}
+  .bub li{font-size:12px;line-height:1.5}
+  .kref{display:inline-flex;align-items:center;font-family:var(--f-num);font-size:9.5px;font-weight:700;color:var(--app-gold);
+    background:color-mix(in srgb,var(--app-gold) 15%,transparent);border:1px solid color-mix(in srgb,var(--app-gold) 32%,transparent);
+    padding:0 5px;border-radius:6px;margin-left:3px;vertical-align:1px}
+
+  /* citation card */
+  .cite{margin-top:9px;border-radius:14px;border:1px solid var(--app-line);background:var(--app-surface2);padding:11px;display:flex;flex-direction:column;gap:9px}
+  .cite .top{display:flex;align-items:center;gap:7px}
+  .cite .top b{font-size:11px;font-weight:800;color:var(--app-blue-strong)}
+  .cite .top .verified{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:var(--app-ok)}
+  .cite .top .verified svg{width:11px;height:11px}
+  .citem{border-radius:10px;background:var(--app-surface);border:1px solid var(--app-line);padding:9px 10px}
+  .citem .cid{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .kchip{font-family:var(--f-num);font-size:9.5px;font-weight:800;color:#fff;background:var(--app-blue);padding:1px 6px;border-radius:6px}
+  .citem .cid b{font-size:11px;font-weight:700;color:var(--app-text)}
+  .stat{font-size:9px;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:auto}
+  .stat.ok{color:var(--app-ok);background:color-mix(in srgb,var(--app-ok) 14%,transparent)}
+  .stat.bad{color:var(--app-danger);background:color-mix(in srgb,var(--app-danger) 14%,transparent)}
+  .citem p{margin:6px 0 0;font-size:10.5px;line-height:1.5;color:var(--app-muted)}
+  .citem .src{margin-top:5px;font-size:9.5px;color:var(--app-faint);font-family:var(--f-num)}
+
+  /* progress ring + field chips */
+  .progrow{display:flex;align-items:center;gap:13px;padding:12px;border-radius:16px;background:var(--app-surface);border:1px solid var(--app-line);margin-bottom:12px}
+  .ring{width:52px;height:52px;flex:none;border-radius:50%;display:grid;place-items:center;position:relative;
+    background:conic-gradient(var(--app-gold) 0 62%,var(--app-surface2) 62% 100%)}
+  .ring::before{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--app-surface)}
+  .ring b{position:relative;font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:13px;font-weight:800;color:var(--app-text)}
+  .progrow .info b{font-size:12.5px;font-weight:700;display:block}
+  .progrow .info small{font-size:10.5px;color:var(--app-muted)}
+  .fchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .fchip{font-size:9.5px;font-weight:600;padding:3px 8px;border-radius:999px;color:var(--app-faint);background:var(--app-surface2);border:1px solid var(--app-line)}
+  .fchip.done{color:var(--gold-deep);background:color-mix(in srgb,var(--app-gold) 18%,transparent);border-color:transparent}
+  :root[data-theme="dark"] .fchip.done,.app-dark .fchip.done{color:var(--app-glow)}
+
+  /* forms */
+  .fgroup{margin-bottom:14px}
+  .fgroup>.gl{font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--app-faint);margin:0 2px 8px}
+  .field{margin-bottom:10px}
+  .field label{display:block;font-size:11px;color:var(--app-muted);margin:0 2px 5px;font-weight:600}
+  .input{border-radius:11px;border:1px solid var(--app-line);background:var(--app-surface2);padding:10px 12px;font-size:12px;color:var(--app-text);min-height:40px;display:flex;align-items:center}
+  .input.area{min-height:58px;align-items:flex-start;line-height:1.5}
+  .input.focus{border-color:var(--app-blue);box-shadow:0 0 0 3px color-mix(in srgb,var(--app-blue) 18%,transparent);background:var(--app-surface)}
+  .input .ph{color:var(--app-faint)}
+  .input .val{color:var(--app-text)}
+  .btn-primary{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:13px;
+    font-family:inherit;font-size:13px;font-weight:800;color:#fff;background:linear-gradient(180deg,var(--app-blue),var(--app-blue-strong));
+    box-shadow:0 12px 26px -10px color-mix(in srgb,var(--app-blue) 75%,transparent)}
+  :root[data-theme="dark"] .btn-primary,.app-dark .btn-primary{color:#08111f}
+  .btn-primary svg{width:16px;height:16px}
+
+  /* settings cards */
+  .scard2{border-radius:16px;border:1px solid var(--app-line);background:var(--app-surface);padding:14px;margin-bottom:11px;box-shadow:0 4px 14px -10px rgba(16,30,51,.3)}
+  .scard2 .ct{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+  .scard2 .ct .ci{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--app-tint);color:var(--app-blue)}
+  .scard2 .ct .ci svg{width:15px;height:15px}
+  .scard2 .ct b{font-size:12.5px;font-weight:800}
+  .kv{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--app-line);font-size:11.5px}
+  .kv:first-of-type{border-top:0}
+  .kv .k{color:var(--app-muted)}
+  .kv .v{font-family:var(--f-num);color:var(--app-text);font-weight:600;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:6px}
+  .shield{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:var(--app-ok);background:color-mix(in srgb,var(--app-ok) 14%,transparent);padding:2px 7px;border-radius:999px}
+  .shield svg{width:11px;height:11px}
+  .pill-state{font-size:9.5px;font-weight:700;padding:2px 9px;border-radius:999px;color:var(--app-ok);background:color-mix(in srgb,var(--app-ok) 14%,transparent)}
+  .seg{display:flex;background:var(--app-surface2);border:1px solid var(--app-line);border-radius:11px;padding:3px;gap:3px}
+  .seg span{flex:1;text-align:center;font-size:10.5px;font-weight:700;padding:6px;border-radius:8px;color:var(--app-muted)}
+  .seg span.on{background:var(--app-surface);color:var(--app-blue);box-shadow:0 2px 6px -2px rgba(16,30,51,.3)}
+  :root[data-theme="dark"] .seg span.on,.app-dark .seg span.on{background:var(--app-blue);color:#08111f}
+
+  /* tablet split */
+  .split{display:flex;height:100%;gap:0}
+  .split .left{width:57%;display:flex;flex-direction:column;border-right:1px solid var(--app-line)}
+  .split .right{flex:1;background:var(--app-surface2);display:flex;flex-direction:column}
+  .split .lhead{padding:14px 16px 10px;flex:none}
+  .split .lhead h4{margin:0;font-size:16px;font-weight:800;color:var(--app-text)}
+  .split .lbody{flex:1;overflow:hidden;padding:0 16px}
+  .split .rhead{padding:14px 15px 8px;display:flex;align-items:center;gap:10px;flex:none}
+  .split .rbody{flex:1;overflow:hidden;padding:2px 15px}
+  .mini-field{margin-bottom:9px}
+  .mini-field .ml{font-size:9.5px;color:var(--app-faint);font-weight:700;margin-bottom:3px}
+  .mini-field .mv{font-size:11px;color:var(--app-text);background:var(--app-surface);border:1px solid var(--app-line);border-radius:9px;padding:7px 9px}
+  .mini-field .mv.empty{color:var(--app-faint)}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:8px;color:var(--muted);font-size:12px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;text-align:center}
+  footer b{color:var(--ink)}
+  @media (prefers-reduced-motion:no-preference){
+    .theme-toggle button{transition:.2s}
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="scale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3v17"/><path d="M6 20h12"/><path d="M4.5 6.5h15"/><circle cx="12" cy="4.4" r="1.3"/>
+      <path d="M4.5 6.5 2 13h5z"/><path d="M4.5 13a2.5 2.5 0 0 0 5 0"/>
+      <path d="M19.5 6.5 17 13h5z"/><path d="M17 13a2.5 2.5 0 0 0 5 0"/>
+    </symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.8A8 8 0 1 1 21 12Z"/><path d="M8.5 11h7M8.5 14h4"/>
+    </symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2.2h6a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M8 13h8"/>
+    </symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3.1"/><path d="M12 3v2.2M12 18.8V21M4.2 7.5l1.9 1.1M17.9 15.4l1.9 1.1M4.2 16.5l1.9-1.1M17.9 8.6l1.9-1.1"/>
+    </symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></symbol>
+    <symbol id="i-clip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5 12 19a4.5 4.5 0 0 1-6.4-6.4l8-8a3 3 0 0 1 4.3 4.3l-8 8a1.5 1.5 0 0 1-2.1-2.1l7.3-7.3"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.6-3 8-7 10-4-2-7-5.4-7-10V6Z"/><path d="M9.2 12l2 2 3.6-3.8"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H19v16H7.5A2.5 2.5 0 0 0 5 20.5Z"/><path d="M5 20.5V4.5"/><path d="M9 7h6M9 10h4"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2.2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s6.5-6 6.5-11a6.5 6.5 0 0 0-13 0C5.5 15 12 21 12 21Z"/><circle cx="12" cy="10" r="2.2"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-wage" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 9.5h4a1.6 1.6 0 0 1 0 3.2h-3a1.6 1.6 0 0 0 0 3.2h4"/></symbol>
+    <symbol id="i-fire" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s5 3.5 5 9a5 5 0 0 1-10 0c0-1.6.6-2.8 1.3-3.6C9 10 10 11 10 12c0-2.2 1-4.5 2-6.9Z"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7Z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 15h5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.4l2.6 1.6"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="brandmark">
+      <div class="seal"><svg style="color:#fff"><use href="#scale"/></svg></div>
+      <div><b>劳动权益助手 · 比赛公开预览</b><span>2026 中国高校计算机大赛 · 人工智能创意赛（鸿蒙赛道）</span></div>
+    </div>
+    <div class="toolbar">
+      <div class="theme-toggle" role="group" aria-label="主题切换">
+        <button data-t="light" aria-pressed="false">浅色</button>
+        <button data-t="auto" aria-pressed="true">跟随系统</button>
+        <button data-t="dark" aria-pressed="false">深色</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <svg class="ghost-scale" aria-hidden="true"><use href="#scale"/></svg>
+    <div class="eyebrow">应用创新 · 手机端 HAP 已实现</div>
+    <h1>为普通劳动者，重塑一套可信的 AI 法律助手界面</h1>
+    <p>以天平的秩序感与鸿蒙的空间光影，把本地法规检索、可核对引用、多轮咨询与案件梳理，装进一套现代、专业、温暖的正义蓝界面。</p>
+    <div class="metas">
+      <span class="chip-h gold"><span style="width:6px;height:6px;border-radius:50%;background:#0e1a2e"></span>正义蓝 × 鎏金</span>
+      <span class="chip-h"><span class="dot"></span>跟随系统 / 浅色 / 深色</span>
+      <span class="chip-h">悬浮岛导航 · 沉浸光感</span>
+      <span class="chip-h">HarmonyOS 6.1 · 手机端</span>
+    </div>
+  </div>
+  <div class="release-note">
+    <span class="badge">公开说明</span>
+    <p>本页展示已落地到参赛 HAP 的手机端视觉与交互设计。页面中的手机号、单位、工资与对话内容均为虚构演示数据；不包含 API Key、签名材料或任何个人隐私。</p>
+  </div>
+
+  <!-- TOKENS -->
+  <section>
+    <div class="sec-head"><span class="sec-idx">01</span><h2>色彩与字体规范</h2><p>语义化 token，落到 <code>resources/base|dark/element/color.json</code>；浅色显示当前主题值。</p></div>
+    <div class="token-grid">
+      <div class="panel">
+        <h3>调色板</h3>
+        <p class="sub">正义蓝为骨、鎏金为光；金色仅作点睛与光感，不用于正文小字。</p>
+        <div class="swatches">
+          <div class="sw"><div class="cap" style="background:#1D4B8F"></div><div class="meta"><b>正义蓝 主色</b><code>#1D4B8F</code></div></div>
+          <div class="sw"><div class="cap" style="background:#12315E"></div><div class="meta"><b>深蓝 标题</b><code>#12315E</code></div></div>
+          <div class="sw"><div class="cap" style="background:linear-gradient(180deg,#C0842A,#FFD98A)"></div><div class="meta"><b>鎏金 点睛</b><code>#C0842A</code></div></div>
+          <div class="sw"><div class="cap" style="background:#2E9E7B"></div><div class="meta"><b>现行 / 校验</b><code>#2E9E7B</code></div></div>
+          <div class="sw"><div class="cap" style="background:#D1584E"></div><div class="meta"><b>失效 / 错误</b><code>#D1584E</code></div></div>
+          <div class="sw"><div class="duo"><i style="background:#F5F7FB"></i><i style="background:#0A1220"></i></div><div class="meta"><b>背景 浅/深</b><code>#F5F7FB · #0A1220</code></div></div>
+          <div class="sw"><div class="duo"><i style="background:#FFFFFF"></i><i style="background:#141F33"></i></div><div class="meta"><b>卡片 浅/深</b><code>#FFFFFF · #141F33</code></div></div>
+          <div class="sw"><div class="duo"><i style="background:#0F1E33"></i><i style="background:#EAF0FA"></i></div><div class="meta"><b>正文 浅/深</b><code>#0F1E33 · #EAF0FA</code></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>字体阶梯</h3>
+        <p class="sub">HarmonyOS Sans SC，8 级阶梯；正文 ≥14fp、行高 ≥1.5。</p>
+        <div class="type-row"><span class="demo" style="font-size:22px;font-weight:800;letter-spacing:-.3px">劳动权益助手</span><span class="spec">28 · Bold</span></div>
+        <div class="type-row"><span class="demo" style="font-size:18px;font-weight:800">案件分析</span><span class="spec">22 · Bold</span></div>
+        <div class="type-row"><span class="demo" style="font-size:15px;font-weight:700">本轮检索依据</span><span class="spec">18 · Semibold</span></div>
+        <div class="type-row"><span class="demo" style="font-size:14px">公司拖欠工资，我应如何维权？</span><span class="spec">15 · Regular</span></div>
+        <div class="type-row"><span class="demo" style="font-size:12.5px;color:var(--muted)">追索工资与经济补偿</span><span class="spec">13 · Medium</span></div>
+        <div class="type-row"><span class="lbl">来源 · 状态</span><span class="spec">12 · Caption</span></div>
+        <div class="type-row"><span class="lbl" style="letter-spacing:1.5px">普法 · 案件 · 卷宗 · 设置</span><span class="spec">11 · Micro</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARISON ROW: consult welcome light vs dark -->
+  <section>
+    <div class="sec-head"><span class="sec-idx">02</span><h2>普法咨询 · 欢迎态</h2><p>同一界面的浅色与深色双主题：沉浸头图、信任条、场景卡与悬浮组合输入区。</p></div>
+    <div class="stage">
+      <!-- LIGHT -->
+      <div class="device">
+        <span class="cap-pill">浅色 · 纸面</span>
+        <div class="phone mini t-light">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><span class="r"><span class="sig"><i></i><i></i><i></i><i></i></span><span style="font-size:10px">5G</span><span class="batt"><i></i></span></span></div>
+            <div class="body">
+              <div class="scrollcol tall">
+                <div class="hband">
+                  <svg class="ghost" aria-hidden="true"><use href="#scale"/></svg>
+                  <h4>劳动权益助手</h4><small>懂法律，更懂你的难处</small><div class="rule"></div>
+                </div>
+                <div class="trust">
+                  <span class="tchip"><svg><use href="#i-book"/></svg>本地检索</span>
+                  <span class="tchip"><svg><use href="#i-shield"/></svg>隐私安全</span>
+                  <span class="tchip count"><b>2790</b> 份资料就绪</span>
+                </div>
+                <div class="grid2">
+                  <div class="scard blue"><div class="ic"><svg><use href="#i-wage"/></svg></div><b>工资拖欠</b><small>追索工资与补偿</small><svg class="arr" width="12" height="12"><use href="#i-arrow"/></svg></div>
+                  <div class="scard gold"><div class="ic"><svg><use href="#i-fire"/></svg></div><b>被公司辞退</b><small>解除程序风险</small><svg class="arr" width="12" height="12"><use href="#i-arrow"/></svg></div>
+                  <div class="scard gold"><div class="ic"><svg><use href="#i-doc"/></svg></div><b>没有劳动合同</b><small>双倍工资举证</small><svg class="arr" width="12" height="12"><use href="#i-arrow"/></svg></div>
+                  <div class="scard blue"><div class="ic"><svg><use href="#i-clock"/></svg></div><b>加班费争议</b><small>计算方式与证据</small><svg class="arr" width="12" height="12"><use href="#i-arrow"/></svg></div>
+                </div>
+                <div class="kpanel"><div class="badge"><svg><use href="#i-book"/></svg></div><div><b>本地法规库</b><small>52903 文本块 · 仅本地检索</small></div><span class="go">52<small style="font-size:9px">MiB</small></span></div>
+              </div>
+              <div class="composer"><div class="rnd"><svg><use href="#i-clip"/></svg></div><input placeholder="输入劳动法律问题…" aria-label="输入问题"><button class="send" aria-label="发送"><svg><use href="#i-send"/></svg></button></div>
+              <nav class="nav">
+                <a class="on" href="#"><svg><use href="#i-chat"/></svg><small>普法</small></a>
+                <a href="#"><svg><use href="#scale"/></svg><small>案件</small></a>
+                <a href="#"><svg><use href="#i-folder"/></svg><small>卷宗</small></a>
+                <a href="#"><svg><use href="#i-gear"/></svg><small>设置</small></a>
+              </nav>
+              <div class="gesture"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- DARK -->
+      <div class="device">
+        <span class="cap-pill">深色 · 深空玻璃</span>
+        <div class="phone mini t-dark app-dark">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><span class="r"><span class="sig"><i></i><i></i><i></i><i></i></span><span style="font-size:10px">5G</span><span class="batt"><i></i></span></span></div>
+            <div class="body">
+              <div class="scrollcol tall">
+                <div class="hband">
+                  <svg class="ghost" aria-hidden="true"><use href="#scale"/></svg>
+                  <h4>劳动权益助手</h4><small>懂法律，更懂你的难处</small><div class="rule"></div>
+                </div>
+                <div class="trust">
+                  <span class="tchip"><svg><use href="#i-book"/></svg>本地检索</span>
+                  <span class="tchip"><svg><use href="#i-shield"/></svg>隐私安全</span>
+                  <span class="tchip count"><b>2790</b> 份资料就绪</span>
+                </div>
+                <div class="grid2">
+                  <div class="scard blue"><div class="ic"><svg><use href="#i-wage"/></svg></div><b>工资拖欠</b><small>追索工资与补偿</small><svg class="arr" width="12" height="12"><use href="#i-arrow"/></svg></div>
+                  <div class="scard gold"><div class="ic"><svg><use href="#i-fire"/></svg></div><b>被公司辞退</b><small>解除程序风险</small><svg class="arr" width="12" height="12"><use href="#i-arrow"/></svg></div>
+                  <div class="scard gold"><div class="ic"><svg><use href="#i-doc"/></svg></div><b>没有劳动合同</b><small>双倍工资举证</small><svg class="arr" width="12" height="12"><use href="#i-arrow"/></svg></div>
+                  <div class="scard blue"><div class="ic"><svg><use href="#i-clock"/></svg></div><b>加班费争议</b><small>计算方式与证据</small><svg class="arr" width="12" height="12"><use href="#i-arrow"/></svg></div>
+                </div>
+                <div class="kpanel"><div class="badge"><svg><use href="#i-book"/></svg></div><div><b>本地法规库</b><small>52903 文本块 · 仅本地检索</small></div><span class="go">52<small style="font-size:9px">MiB</small></span></div>
+              </div>
+              <div class="composer"><div class="rnd"><svg><use href="#i-clip"/></svg></div><input placeholder="输入劳动法律问题…" aria-label="输入问题"><button class="send" aria-label="发送"><svg><use href="#i-send"/></svg></button></div>
+              <nav class="nav">
+                <a class="on" href="#"><svg><use href="#i-chat"/></svg><small>普法</small></a>
+                <a href="#"><svg><use href="#scale"/></svg><small>案件</small></a>
+                <a href="#"><svg><use href="#i-folder"/></svg><small>卷宗</small></a>
+                <a href="#"><svg><use href="#i-gear"/></svg><small>设置</small></a>
+              </nav>
+              <div class="gesture"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i style="background:#1D4B8F"></i>正义蓝主色</span>
+      <span><i style="background:linear-gradient(180deg,#C0842A,#FFD98A)"></i>鎏金光感</span>
+      <span><i style="background:#2E9E7B"></i>现行有效</span>
+      <span><i style="background:#D1584E"></i>已失效</span>
+    </div>
+  </section>
+
+  <!-- FOUR MODULES (follow page theme) -->
+  <section>
+    <div class="sec-head"><span class="sec-idx">03</span><h2>四大模块 · 关键页面</h2><p>随页面主题切换（右上角）。普法对话态、案件分析、智能卷宗、模型设置。</p></div>
+    <div class="stage">
+
+      <!-- CONSULT CONVERSATION -->
+      <div class="device">
+        <span class="cap-pill">普法咨询 · 对话态</span>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><span class="r"><span class="sig"><i></i><i></i><i></i><i></i></span><span style="font-size:10px">5G</span><span class="batt"><i></i></span></span></div>
+            <div class="body">
+              <div class="apphead" style="padding:8px 4px 10px"><h4>普法咨询</h4><small>多轮问答 · 本地法条引用</small></div>
+              <div class="scrollcol tall">
+                <div class="msgs">
+                  <div class="m user"><div class="bub">公司拖欠我三个月工资，我该怎么维权？</div></div>
+                  <div class="m ai">
+                    <div class="ai-av"><svg><use href="#scale"/></svg></div>
+                    <div class="bub">
+                      <p class="h5">维权路径</p>
+                      <ol>
+                        <li>先与用人单位协商，书面主张支付欠薪<span class="kref">依据 K1</span></li>
+                        <li>协商不成，向劳动监察部门投诉或申请调解<span class="kref">依据 K2</span></li>
+                        <li>可就欠薪申请劳动仲裁，主张工资及经济补偿</li>
+                      </ol>
+                      <div class="cite">
+                        <div class="top"><b>本轮检索依据</b><span style="font-size:9.5px;color:var(--app-muted)">2 条</span><span class="verified"><svg><use href="#i-check"/></svg>引用已校验</span></div>
+                        <div class="citem">
+                          <div class="cid"><span class="kchip">K1</span><b>劳动合同法 · 第三十条</b><span class="stat ok">现行有效</span></div>
+                          <p>用人单位应当按照劳动合同约定和国家规定，向劳动者及时足额支付劳动报酬……</p>
+                          <div class="src">来源：中华人民共和国劳动合同法</div>
+                        </div>
+                        <div class="citem">
+                          <div class="cid"><span class="kchip">K2</span><b>劳动争议调解仲裁法 · 第二条</b><span class="stat ok">现行有效</span></div>
+                          <p>因支付工资报酬发生的争议，适用本法……</p>
+                          <div class="src">来源：劳动争议调解仲裁法</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="composer dim"><div class="rnd"><svg><use href="#i-clip"/></svg></div><input placeholder="继续追问…" aria-label="继续输入"><button class="send" aria-label="发送"><svg><use href="#i-send"/></svg></button></div>
+              <nav class="nav">
+                <a class="on" href="#"><svg><use href="#i-chat"/></svg><small>普法</small></a>
+                <a href="#"><svg><use href="#scale"/></svg><small>案件</small></a>
+                <a href="#"><svg><use href="#i-folder"/></svg><small>卷宗</small></a>
+                <a href="#"><svg><use href="#i-gear"/></svg><small>设置</small></a>
+              </nav>
+              <div class="gesture"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CASE ANALYSIS -->
+      <div class="device">
+        <span class="cap-pill">案件分析 · 多轮梳理</span>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><span class="r"><span class="sig"><i></i><i></i><i></i><i></i></span><span style="font-size:10px">5G</span><span class="batt"><i></i></span></span></div>
+            <div class="body">
+              <div class="apphead" style="padding:8px 4px 10px"><h4>案件分析</h4><small>分阶段梳理事实与法律风险</small></div>
+              <div class="scrollcol tall">
+                <div class="progrow">
+                  <div class="ring"><b>62%</b></div>
+                  <div class="info"><b>卷宗完整度</b><small>再补充 2 项即可生成报告</small>
+                    <div class="fchips">
+                      <span class="fchip done">地点</span><span class="fchip done">单位</span><span class="fchip done">薪资</span>
+                      <span class="fchip done">时间</span><span class="fchip">诉求</span><span class="fchip">经过</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="msgs">
+                  <div class="m ai"><div class="ai-av"><svg><use href="#scale"/></svg></div><div class="bub">我们按<b>事实 → 争议 → 证据</b>逐步梳理。先告诉我：单位是在哪个城市，你入职和发生争议的时间点？</div></div>
+                  <div class="m user"><div class="bub">深圳，2023年3月入职，2024年5月被辞退，平均月薪 8500 元。</div></div>
+                  <div class="m ai"><div class="ai-av"><svg><use href="#scale"/></svg></div><div class="bub">已记入卷宗。辞退时公司是否出具书面通知？有无提前 30 天或支付代通知金？这关系到是否<b>违法解除</b>。</div></div>
+                </div>
+              </div>
+              <div class="composer"><div class="rnd"><svg><use href="#i-clip"/></svg></div><input placeholder="描述案情或上传材料…" aria-label="输入案情"><button class="send" aria-label="发送"><svg><use href="#i-send"/></svg></button></div>
+              <nav class="nav">
+                <a href="#"><svg><use href="#i-chat"/></svg><small>普法</small></a>
+                <a class="on" href="#"><svg><use href="#scale"/></svg><small>案件</small></a>
+                <a href="#"><svg><use href="#i-folder"/></svg><small>卷宗</small></a>
+                <a href="#"><svg><use href="#i-gear"/></svg><small>设置</small></a>
+              </nav>
+              <div class="gesture"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOSSIER -->
+      <div class="device">
+        <span class="cap-pill">卷宗管理 · 结构化表单</span>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><span class="r"><span class="sig"><i></i><i></i><i></i><i></i></span><span style="font-size:10px">5G</span><span class="batt"><i></i></span></span></div>
+            <div class="body">
+              <div class="apphead" style="padding:8px 4px 10px"><h4>智能卷宗</h4><small>整理事实，形成清晰的分析报告</small></div>
+              <div class="scrollcol">
+                <div class="progrow">
+                  <div class="ring"><b>62%</b></div>
+                  <div class="info"><b>信息完整度 62%</b><small>≥ 60% 可生成分析报告</small></div>
+                </div>
+                <div class="fgroup">
+                  <div class="gl">基本信息</div>
+                  <div class="field"><label>案件发生地</label><div class="input"><span class="val">广东省 · 深圳市</span></div></div>
+                  <div class="field"><label>单位名称</label><div class="input"><span class="val">某某科技有限公司</span></div></div>
+                  <div class="field"><label>平均月薪</label><div class="input focus"><span class="val">8500 元 / 月（税前）</span></div></div>
+                  <div class="field"><label>时间节点</label><div class="input"><span class="val">2023.03 入职 · 2024.05 争议</span></div></div>
+                </div>
+                <div class="fgroup">
+                  <div class="gl">案情</div>
+                  <div class="field"><label>核心诉求</label><div class="input"><span class="ph">希望解决的问题…</span></div></div>
+                  <div class="field"><label>详细经过</label><div class="input area"><span class="ph">按时间顺序描述事实…</span></div></div>
+                </div>
+                <button class="btn-primary"><svg><use href="#i-doc"/></svg>生成案件分析报告</button>
+                <div style="height:8px"></div>
+              </div>
+              <nav class="nav">
+                <a href="#"><svg><use href="#i-chat"/></svg><small>普法</small></a>
+                <a href="#"><svg><use href="#scale"/></svg><small>案件</small></a>
+                <a class="on" href="#"><svg><use href="#i-folder"/></svg><small>卷宗</small></a>
+                <a href="#"><svg><use href="#i-gear"/></svg><small>设置</small></a>
+              </nav>
+              <div class="gesture"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="device">
+        <span class="cap-pill">模型设置 · 安全连接</span>
+        <div class="phone">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><span class="r"><span class="sig"><i></i><i></i><i></i><i></i></span><span style="font-size:10px">5G</span><span class="batt"><i></i></span></span></div>
+            <div class="body">
+              <div class="apphead" style="padding:8px 4px 10px"><h4>模型设置</h4><small>安全连接你选择的模型服务</small></div>
+              <div class="scrollcol">
+                <div class="scard2">
+                  <div class="ct"><span class="ci"><svg><use href="#i-gear"/></svg></span><b>模型连接</b><span class="pill-state" style="margin-left:auto">连接成功</span></div>
+                  <div class="field"><label>Base URL</label><div class="input"><span class="val" style="font-family:var(--f-num)">https://api.openai.com/v1</span></div></div>
+                  <div class="field"><label>模型名称</label><div class="input"><span class="val" style="font-family:var(--f-num)">gpt-4o-mini</span></div></div>
+                  <div class="field"><label>API Key</label><div class="input focus" style="justify-content:space-between"><span class="val" style="font-family:var(--f-num);letter-spacing:2px">••••••••••••</span><span class="shield"><svg><use href="#i-lock"/></svg>已加密保存于本机</span></div></div>
+                  <button class="btn-primary" style="margin-top:4px;background:var(--app-surface2);color:var(--app-blue);box-shadow:none;border:1px solid var(--app-line)"><svg><use href="#i-check"/></svg>测试连接</button>
+                </div>
+                <div class="scard2">
+                  <div class="ct"><span class="ci"><svg><use href="#i-book"/></svg></span><b>本地法规库</b></div>
+                  <div class="kv"><span class="k">收录资料</span><span class="v">2790 份</span></div>
+                  <div class="kv"><span class="k">文本块</span><span class="v">52903 块</span></div>
+                  <div class="kv"><span class="k">索引大小</span><span class="v">约 52 MiB</span></div>
+                  <div class="kv"><span class="k">检索方式</span><span class="v"><span class="shield"><svg><use href="#i-shield"/></svg>仅本地 · 不联网</span></span></div>
+                </div>
+                <div class="scard2">
+                  <div class="ct"><span class="ci"><svg><use href="#i-lock"/></svg></span><b>外观</b></div>
+                  <div class="seg"><span>跟随系统</span><span class="on">浅色</span><span>深色</span></div>
+                </div>
+                <div style="height:6px"></div>
+              </div>
+              <nav class="nav">
+                <a href="#"><svg><use href="#i-chat"/></svg><small>普法</small></a>
+                <a href="#"><svg><use href="#scale"/></svg><small>案件</small></a>
+                <a href="#"><svg><use href="#i-folder"/></svg><small>卷宗</small></a>
+                <a class="on" href="#"><svg><use href="#i-gear"/></svg><small>设置</small></a>
+              </nav>
+              <div class="gesture"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 后续概念草案保留在源文件中，但不在比赛公开页展示，避免与本次手机端 HAP 的已实现范围混淆。 -->
+  <section hidden aria-hidden="true">
+    <div class="sec-head"><span class="sec-idx">04</span><h2>后续概念 · 平板案件双栏</h2><p>该部分未纳入本次参赛 HAP。</p></div>
+    <div class="stage">
+      <div class="device">
+        <div class="tablet">
+          <div class="screen">
+            <div class="statusbar"><span>9:41</span><span class="r"><span class="sig"><i></i><i></i><i></i><i></i></span><span style="font-size:10px">Wi-Fi</span><span class="batt"><i></i></span></span></div>
+            <div class="body">
+              <div class="split">
+                <div class="left">
+                  <div class="lhead"><h4>案件分析</h4><small style="color:var(--app-muted);font-size:11px">事实 · 争议 · 证据</small></div>
+                  <div class="lbody">
+                    <div class="msgs">
+                      <div class="m ai"><div class="ai-av"><svg><use href="#scale"/></svg></div><div class="bub">辞退时公司是否出具书面通知？是否提前 30 天或支付代通知金？</div></div>
+                      <div class="m user"><div class="bub">没有书面通知，也没提前告知，当天就让我走。</div></div>
+                      <div class="m ai"><div class="ai-av"><svg><use href="#scale"/></svg></div><div class="bub">这可能构成<b>违法解除</b>，可主张<b>2 倍</b>经济补偿<span class="kref">依据 K1</span>。已把关键事实同步到右侧卷宗。</div></div>
+                    </div>
+                  </div>
+                  <div class="composer" style="position:relative;left:0;right:0;bottom:0;margin:10px 16px 14px"><div class="rnd"><svg><use href="#i-clip"/></svg></div><input placeholder="描述案情或上传材料…" aria-label="输入案情"><button class="send" aria-label="发送"><svg><use href="#i-send"/></svg></button></div>
+                </div>
+                <div class="right">
+                  <div class="rhead"><div class="ring" style="width:44px;height:44px"><b style="font-size:11px">62%</b></div><div><b style="font-size:13px;color:var(--app-text)">案件卷宗</b><br><small style="font-size:10px;color:var(--app-muted)">对话自动回填</small></div></div>
+                  <div class="rbody">
+                    <div class="mini-field"><div class="ml">案件发生地</div><div class="mv">广东省 · 深圳市</div></div>
+                    <div class="mini-field"><div class="ml">单位名称</div><div class="mv">某某科技有限公司</div></div>
+                    <div class="mini-field"><div class="ml">平均月薪</div><div class="mv">8500 元 / 月（税前）</div></div>
+                    <div class="mini-field"><div class="ml">时间节点</div><div class="mv">2023.03 入职 · 2024.05 被辞退</div></div>
+                    <div class="mini-field"><div class="ml">核心诉求</div><div class="mv empty">待补充…</div></div>
+                    <div class="mini-field"><div class="ml">详细经过</div><div class="mv empty">待补充…</div></div>
+                    <button class="btn-primary" style="margin-top:4px;font-size:12px;padding:11px"><svg><use href="#i-doc"/></svg>生成分析报告</button>
+                  </div>
+                </div>
+              </div>
+              <div class="gesture"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-idx">04</span><h2>参赛版本 · 已实现能力</h2><p>页面展示范围与当前手机端 HAP 保持一致，不把后续概念功能计入参赛成果。</p></div>
+    <div class="release-grid">
+      <article class="release-card">
+        <span class="num">HARMONYOS</span>
+        <h3>沉浸式鸿蒙体验</h3>
+        <p>全面屏系统栏适配、沉浸头图、悬浮岛式 HdsTabs 导航与桌面服务卡片，形成统一的空间光感体验。</p>
+      </article>
+      <article class="release-card">
+        <span class="num">AI + LOCAL RAG</span>
+        <h3>可核对的劳动法律咨询</h3>
+        <p>支持普法多轮问答、案件梳理、智能卷宗、文件上传与本地法规检索，并在回答中展示引用及有效性状态。</p>
+      </article>
+      <article class="release-card">
+        <span class="num">LIGHT / AUTO / DARK</span>
+        <h3>完整深浅色适配</h3>
+        <p>支持跟随系统、浅色与深色三种外观模式；背景、文字、卡片、输入框与系统栏均使用主题 token 保持对比度。</p>
+      </article>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>实现状态</b> · 本公开预览对应的 ArkTS 手机端界面已完成构建并生成可演示 HAP；普法、案件、卷宗、设置、本地知识库、文件上传和多轮对话等原有业务能力均予以保留。</p>
+    <p style="margin-top:6px;color:var(--faint);font-size:11.5px">本页为参赛版本的交互式视觉预览，并非逐帧真机截图；文案与人物、单位及金额均为演示信息。AI 法律内容仅供参考，重要决定请核对最新法规或咨询专业人士。</p>
+  </footer>
+</div>
+
+<script>
+  (function(){
+    var root=document.documentElement;
+    var btns=document.querySelectorAll('.theme-toggle button');
+    function apply(mode){
+      if(mode==='auto'){root.removeAttribute('data-theme');}
+      else{root.setAttribute('data-theme',mode);}
+      btns.forEach(function(b){b.setAttribute('aria-pressed', b.dataset.t===mode ? 'true':'false');});
+    }
+    btns.forEach(function(b){b.addEventListener('click',function(){apply(b.dataset.t);});});
+  })();
+</script>
+</body>
+</html>

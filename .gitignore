@@ -1,9 +1,11 @@
 # 忽略 Python 缓存和虚拟环境
 __pycache__/
+*.py[cod]
 venv/
 .venv/
 env/
 .env
+.DS_Store
 
 # 忽略打包生成的文件夹（云端会帮我们重新打包）
 build/
@@ -20,6 +22,21 @@ data/
 
 # 忽略 IDE 配置
 .vscode/
+.idea/
+
+# 忽略 HarmonyOS/DevEco Studio 本机与构建产物
+.hvigor/
+.deveco/
+oh_modules/
+local.properties
+*.p12
+*.p7b
+*.cer
+*.pem
+*.key
+*.hap
+releases/
+*.log
 
 # 忽略大文件缓存
 chunks_cache.jsonl
@@ -27,3 +44,4 @@ graph_chunks.jsonl
 graph_failures.jsonl
 legal_graph.json
 legal_graph.db*
+/tmp/
